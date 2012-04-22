@@ -1,6 +1,7 @@
 package database;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -20,16 +21,18 @@ public class buildDataSets {
 	 * 
 	 * @param lat
 	 * @param lon
+	 * @throws SQLException 
 	 */
-	public void buildDataSet(int size, Connection conn) {
+	public void buildDataSet(int size, Connection conn) throws SQLException {
 		Double latLonStep = 360 / (MOON_CIRC / size);
 		Double currentLat = LAT_MIN;
 		Double currentLon = LON_MIN;
 		ArrayList<DataTile> row = new ArrayList<DataTile>();
 		ArrayList<ArrayList<DataTile>> dataTiles = new ArrayList<ArrayList<DataTile>>();
+		getData(LAT_MAX, LAT_MAX - latLonStep, currentLon, currentLon+ latLonStep, conn);
 		while (currentLat < LAT_MAX) {
 			while (currentLon < LON_MAX) {
-				DataTile rowTile = processTile(tiles, distance, lat, lon)
+				//DataTile rowTile = processTile(tiles, distance, lat, lon)
 				currentLon += latLonStep;
 			}
 			currentLat += latLonStep;
@@ -95,7 +98,8 @@ public class buildDataSets {
 		finalLat = (int) lat;
 		finalLon = (int) lon;
 
-		return new DataTile(finalLat, finalLon, rankAverage, finalHeight);
+		return null;
+		// return new DataTile(finalLat, finalLon, rankAverage, finalHeight);
 	}
 
 	/**
@@ -111,13 +115,25 @@ public class buildDataSets {
 
 	private void getData(Double latStart, Double latEnd, Double lonStart,
 			Double lonEnd, Connection conn) throws SQLException {
+		ArrayList<DataTile> dataTileResults = new ArrayList<DataTile>();
 		Statement stmt = conn.createStatement();
 		String stmtBuilder = String
-				.format("SELECT * FROM base_data WHERE (LAT > %f AND LAT < %f) AND (LON > %f AND LON < %f)",
+				.format("SELECT * FROM base_data WHERE (LAT > %f AND LAT < %f) AND (LON > %f AND LON < %f) ORDER BY LAT, LON",
 						latStart, latEnd, lonStart, lonEnd);
 
-		// Now sort this data into a lovely two dimensional array
+		ResultSet results = stmt.executeQuery(stmtBuilder);
+		results.beforeFirst();
+		while (results.next()) {
+			Double lat = results.getDouble(0);
+			Double lon = results.getDouble(1);
+			Double height = results.getDouble(2);
+			dataTileResults.add(new DataTile(lat, lon, height));
+		}
 
+	}
+
+	private void sortDataTiles(ArrayList<DataTile> unsorted) {
+		// Split by Lat
 	}
 
 }

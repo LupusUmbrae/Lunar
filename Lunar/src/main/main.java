@@ -1,5 +1,6 @@
 package main;
 
+import image.ImageCreateOverlay;
 import image.ImageProcess;
 import image.PaletteProcess;
 
@@ -7,6 +8,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+
+import database.buildDataSets;
 
 public class main {
 
@@ -22,7 +26,7 @@ public class main {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		try {
-			boolean buildDb = false;
+			boolean buildDb = true;
 
 			Class.forName("com.mysql.jdbc.Driver");
 			String url = String.format("jdbc:mysql://%s:%s/%s", MYSQL_IP,
@@ -43,6 +47,18 @@ public class main {
 						"C:\\Users\\Robin\\git\\Lunar\\Lunar\\resources\\WAC_CSHADE_E000N1800_016P.TIF",
 						conn);
 			}
+			buildDataSets dataSet = new buildDataSets();
+			dataSet.buildDataSet(100, conn);
+			
+//			ArrayList<ArrayList<DataTile>> dataTiles = new ArrayList<ArrayList<DataTile>>();
+//			ArrayList<DataTile> dataTileRow = new ArrayList<DataTile>();
+//			dataTileRow.add(new DataTile(90, 180, 100, 10.0));
+//			dataTileRow.add(new DataTile(0, 180, 0, 10.0));
+//			dataTiles.add(dataTileRow);
+//			dataTiles.add(dataTileRow);
+//			ImageCreateOverlay image = new ImageCreateOverlay();
+//			image.createOverlay(dataTiles);
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
