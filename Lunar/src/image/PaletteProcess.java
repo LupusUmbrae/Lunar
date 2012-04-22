@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.sun.media.jai.codec.ImageCodec;
 import com.sun.media.jai.codec.ImageDecoder;
@@ -85,84 +87,97 @@ public class PaletteProcess {
 		if (evaluationMap.containsKey(red, green, blue)) {
 			return (Double) evaluationMap.get(red, green, blue);
 		} else {
-			red = findRed(red);
-			green = findGreen(red, green);
-			blue = findBlue(red, green, blue);
+			return findCloesetRgb(red, green, blue);
 		}
-		
-		if (evaluationMap.containsKey(red, green, blue)) {
-			return (Double) evaluationMap.get(red, green, blue);
-		} else {
-			throw new Exception("It thought it found a height but apparently it hadnt :S");
-		}
+
+//		if (evaluationMap.containsKey(red, green, blue)) {
+//			return (Double) evaluationMap.get(red, green, blue);
+//		} else {
+//			throw new Exception(
+//					"It thought it found a height but apparently it hadnt :S");
+//		}
 	}
 
-	private int findRed(int red) {
+
+	@SuppressWarnings("unchecked")
+	private Double findCloesetRgb(int red, int green, int blue) {
 
 		int runningRed = red;
-
-		while (runningRed <= 255) {
-			runningRed++;
-			if (redMap.containsKey(runningRed)) {
-				return runningRed;
-			}
-		}
-
-		while (runningRed >= 0) {
-			runningRed--;
-			if (redMap.containsKey(runningRed)) {
-				return runningRed;
-			}
-		}
-		return 0;
-	}
-
-	private int findGreen(int red, int green) throws Exception {
-		ArrayList<Integer> greens = redMap.get(red);
 		int runningGreen = green;
-		int greenDiff = 255;
-
-		// Find closest Match
-		for (Integer greenMatch : greens) {
-			int diff;
-			if (greenMatch < runningGreen) {
-				diff = runningGreen - greenMatch;
-			} else {
-				diff = greenMatch - runningGreen;
-			}
-			if (greenDiff > diff) {
-				runningGreen = greenMatch;
-				greenDiff = diff;
-			}
-		}
-		if (runningGreen == green) {
-			throw new Exception("It broke trying to find green");
-		}
-		return runningGreen;
-	}
-
-	private int findBlue(int red, int green, int blue) throws Exception {
-		ArrayList<Integer> blues = (ArrayList<Integer>) greenMap.get(red, green);
 		int runningBlue = blue;
-		int blueDiff = 255;
 
-		// Find closest Match
-		for (Integer blueMatch : blues) {
-			int diff;
-			if (blueMatch < runningBlue) {
-				diff = runningBlue - blueMatch;
-			} else {
-				diff = blueMatch - runningBlue;
-			}
-			if (blueDiff > diff) {
-				runningBlue = blueMatch;
-				blueDiff = diff;
+		int diffRed = 255;
+		int diffGreen = 255;
+		int diffBlue = 255;
+		
+		
+
+		Set<Integer> possibleReds = redMap.keySet();
+
+		// red, green, blue, diff red, diff green, diff blue
+		ArrayList<Integer[]> matches = new ArrayList<Integer[]>();
+
+		// Brute force.. early morning.. sleeping..
+		for (Integer possibleRed : possibleReds) {
+
+			ArrayList<Integer> possibleGreens = redMap.get(possibleRed);
+
+			for (Integer possibleGreen : possibleGreens) {
+				ArrayList<Integer> possibleBlues = (ArrayList<Integer>) greenMap
+						.get(possibleRed, possibleGreen);
+
+				for (Integer possibleBlue : possibleBlues) {
+					if (evaluationMap.containsKey(possibleRed, possibleGreen,
+							possibleBlue)) {
+						matches.add(calcRgbDiff(red, green, blue, possibleRed, possibleGreen, possibleBlue));
+					}
+				}
 			}
 		}
-		if (runningBlue == blue) {
-			throw new Exception("It broke trying to find a blue");
+		
+		for (Integer[] match : matches) {
+			if(match[3] < diffRed && match[4] < diffGreen && match[5] < diffBlue){
+				runningRed = match[0];
+				runningGreen = match[1];
+				runningBlue = match[2];
+				diffRed = match[3];
+				diffGreen = match[4];
+				diffBlue = match[5];
+			}
 		}
-		return runningBlue;
+		
+		
+		return (Double) evaluationMap.get(runningRed, runningGreen, runningBlue);
 	}
 
+	private Integer[] calcRgbDiff(int startRed, int startGreen, int startBlue,
+			int possibleRed, int possibleGreen, int possibleBlue) {
+
+		int diffRed;
+		int diffGreen;
+		int diffBlue;
+
+		if (startRed > possibleRed) {
+			diffRed = startRed - possibleRed;
+		} else {
+			diffRed = possibleRed - startRed;
+		}
+		
+		if (startGreen > possibleGreen) {
+			diffGreen = startGreen - possibleGreen;
+		} else {
+			diffGreen = possibleGreen - startGreen;
+		}
+		
+		if (startBlue > possibleBlue) {
+			diffBlue = startBlue - possibleBlue;
+		} else {
+			diffBlue = possibleBlue - startBlue;
+		}
+
+		int[] rgbArray = { possibleRed, possibleGreen, possibleBlue, diffRed,
+				diffGreen, diffBlue };
+
+		return ArrayUtils.toObject(rgbArray);
+	}
 }

@@ -22,7 +22,7 @@ public class main {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		try {
-			boolean buildDb = true;
+			boolean buildDb = false;
 
 			Class.forName("com.mysql.jdbc.Driver");
 			String url = String.format("jdbc:mysql://%s:%s/%s", MYSQL_IP,
@@ -31,15 +31,13 @@ public class main {
 					MYSQL_PASSWORD);
 			System.out.println("MySQL Connected");
 
-			 String path =
-			 "C:\\Users\\Robin\\git\\Lunar\\Lunar\\resources\\COLOR_SCALEBAR.TIF";
-			 Double totalElevation = 19910d;
-			 Double startElevationValue = -9150d;
-			
-			 PaletteProcess palette = new PaletteProcess();
-			 palette.createPalette(path, totalElevation, startElevationValue);
-
+			String path = "C:\\Users\\Robin\\git\\Lunar\\Lunar\\resources\\COLOR_SCALEBAR.TIF";
+			Double totalElevation = 19910d;
+			Double startElevationValue = -9150d;
 			if (buildDb) {
+				PaletteProcess palette = new PaletteProcess();
+				palette.createPalette(path, totalElevation, startElevationValue);
+
 				ImageProcess image = new ImageProcess(palette);
 				image.generateData(
 						"C:\\Users\\Robin\\git\\Lunar\\Lunar\\resources\\WAC_CSHADE_E000N1800_016P.TIF",

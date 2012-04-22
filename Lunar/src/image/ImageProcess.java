@@ -52,7 +52,7 @@ public class ImageProcess {
 		loadImage(filename);
 		// convertImage();
 		loadConvertImage();
-		convertRgb();
+		//convertRgb();
 		fillDb(conn);
 	}
 
@@ -99,7 +99,7 @@ public class ImageProcess {
 		File filePlace = new File(OUT_DIR + "//");
 		String[] files = filePlace.list(new Filter(".txt"));
 		for (String file : files) {
-			pixelFiles.add(new File(OUT_DIR + "//" + file));
+			rowFiles.add(new File(OUT_DIR + "//" + file));
 		}
 	}
 
@@ -124,9 +124,12 @@ public class ImageProcess {
 				Double height = palette.convertRgb(rgbString);
 				out.write(String.format("%s,%s,%s\n", lat.toString(), lon.toString(), height.toString()));
 				line = in.readLine();
+				lonPos++;
 			}
 			in.close();
 			out.close();
+			lonPos = 0;
+			latPos++;
 		}
 
 	}
@@ -139,14 +142,18 @@ public class ImageProcess {
 			String stmtBuilder = "INSERT INTO base_data(LAT, LON, HEIGHT) VALUES ";
 			while (line != null) {
 				line = in.readLine();
-				String[] item = line.split(",");
-				stmtBuilder += String.format("(%s, %s, %s),", item[0], item[1],
-						item[2]);
+				if(line != null){
+					String[] item = line.split(",");
+					stmtBuilder += String.format("(%s, %s, %s),", item[0],
+							item[1], item[2]);
+				}
+				
 			}
-			stmtBuilder = stmtBuilder.substring(0, stmtBuilder.length());
-			stmtBuilder += ");";
+			stmtBuilder = stmtBuilder.substring(0, stmtBuilder.length()-1);
+			stmtBuilder += ";";
 			stmt.execute(stmtBuilder);
 		}
+		System.out.println("dbFilled");
 	}
 
 	private class Filter implements FilenameFilter {
