@@ -4,7 +4,6 @@ import java.awt.image.Raster;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
@@ -13,12 +12,17 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.sun.media.jai.codec.ImageCodec;
 import com.sun.media.jai.codec.ImageDecoder;
+
+import database.EnterBaseData;
 
 public class ImageProcess {
 
@@ -36,24 +40,44 @@ public class ImageProcess {
 	private final Double LON_MIN = -180d;
 
 	private final String OUT_DIR = "c:\\temp";
+	private final String PIXEL_DIR = "\\pixels";
+	private final String ROW_DIR = "\\row";
+	private final String PROCESSED_DIR = "\\processed";
 
 	private MultiKeyMap heightMap;
 
 	private Raster image;
 
-	private ArrayList<File> pixelFiles = new ArrayList<File>();
-	private ArrayList<File> rowFiles = new ArrayList<File>();
+	private static ArrayList<File> pixelFiles = new ArrayList<File>();
+	// private static ArrayList<File> rowFiles = new ArrayList<File>();
+
+	private static BlockingQueue<String> statements = new LinkedBlockingQueue<String>();
+	private static BlockingQueue<File> rowFiles = new LinkedBlockingQueue<File>();
 
 	public ImageProcess(PaletteProcess palette) {
 		this.palette = palette;
 	}
 
-	public void generateData(String filename, Connection conn) throws Exception {
+	public void generateData(String filename) throws Exception {
+		createDirectories();
 		loadImage(filename);
 		// convertImage();
 		loadConvertImage();
-		//convertRgb();
-		fillDb(conn);
+		// convertRgb();
+		fillDb();
+	}
+
+	/**
+	 * 
+	 */
+	private void createDirectories() {
+		// TODO: Do some checks here
+		File toCreate = new File(OUT_DIR + PIXEL_DIR + PROCESSED_DIR);
+		toCreate.mkdirs();
+		toCreate = null;
+		toCreate = new File(OUT_DIR + ROW_DIR + PROCESSED_DIR);
+		toCreate.mkdirs();
+		toCreate = null;
 	}
 
 	private void loadImage(String filename) throws IOException {
@@ -65,12 +89,13 @@ public class ImageProcess {
 		image = dec.decodeAsRaster();
 		pixelHeight = image.getHeight();
 		pixelWidth = image.getWidth();
+		System.out.println("Image loaded");
 
 	}
 
 	// Convert
 	private void convertImage() throws IOException {
-
+		// TODO: Thread this
 		heightMap = new MultiKeyMap();
 		for (int y = 0; y < pixelHeight; y++) {
 			ArrayList<Integer[]> row = new ArrayList<Integer[]>();
@@ -90,26 +115,29 @@ public class ImageProcess {
 						pixel[2]));
 			}
 			out.close();
-			pixelFiles.add(file);
+			pixelFilesAdd(file);
 		}
 		System.out.println("Picture to text complete");
 	}
 
 	private void loadConvertImage() {
-		File filePlace = new File(OUT_DIR + "//");
+		File filePlace = new File(OUT_DIR + ROW_DIR + "//");
 		String[] files = filePlace.list(new Filter(".txt"));
 		for (String file : files) {
-			rowFiles.add(new File(OUT_DIR + "//" + file));
+			rowFilesAdd(new File(OUT_DIR + ROW_DIR + "//" + file));
 		}
+		files = null;
 	}
 
 	private void convertRgb() throws Exception {
+		// TODO: Thread this
 		int latPos = 0;
 		int lonPos = 0;
 		pixelLat = 180d / pixelHeight.doubleValue();
 		pixelLon = 360d / pixelWidth.doubleValue();
 
-		for (File pixelFile : pixelFiles) {
+		for (int i = 0; i < pixelFilesSize(); i++) {
+			File pixelFile = pixelFilesGet(i);
 			// +1 just to make it the same numbering as pixel files
 			File heightFile = new File(OUT_DIR + "\\row" + (latPos + 1)
 					+ ".txt");
@@ -122,38 +150,51 @@ public class ImageProcess {
 				Double lat = LAT_MAX - (pixelLat * latPos);
 				Double lon = LON_MIN + (pixelLon * lonPos);
 				Double height = palette.convertRgb(rgbString);
-				out.write(String.format("%s,%s,%s\n", lat.toString(), lon.toString(), height.toString()));
+				out.write(String.format("%s,%s,%s\n", lat.toString(),
+						lon.toString(), height.toString()));
 				line = in.readLine();
 				lonPos++;
 			}
 			in.close();
 			out.close();
+			rowFilesAdd(heightFile);
 			lonPos = 0;
 			latPos++;
 		}
-
+		System.out.println("Pixels convert to raw data");
 	}
 
-	private void fillDb(Connection conn) throws IOException, SQLException {
-		for (File row : rowFiles) {
+	private void fillDb() throws IOException, SQLException,
+			InterruptedException {
+		File processedFileDir = new File(OUT_DIR + ROW_DIR + PROCESSED_DIR);
+		EnterBaseData baseData = new EnterBaseData(this);
+		baseData.run();
+		int rowFileSize = rowFilesSize();
+		for (int i = 0; i < rowFileSize; i++) {
+			File row = rowFilesPoll();
 			BufferedReader in = new BufferedReader(new FileReader(row));
 			String line = in.readLine();
-			Statement stmt = conn.createStatement();
 			String stmtBuilder = "INSERT INTO base_data(LAT, LON, HEIGHT) VALUES ";
 			while (line != null) {
 				line = in.readLine();
-				if(line != null){
+				if (line != null) {
 					String[] item = line.split(",");
 					stmtBuilder += String.format("(%s, %s, %s),", item[0],
 							item[1], item[2]);
 				}
-				
+
 			}
-			stmtBuilder = stmtBuilder.substring(0, stmtBuilder.length()-1);
+			in.close();
+			in = null;
+			stmtBuilder = stmtBuilder.substring(0, stmtBuilder.length() - 1);
 			stmtBuilder += ";";
-			stmt.execute(stmtBuilder);
+			statementsPut(stmtBuilder);
+
+			// Move file
+			FileUtils.moveFileToDirectory(row, processedFileDir, false);
 		}
-		System.out.println("dbFilled");
+		statementsPut("end");
+		System.out.println("Database Filled");
 	}
 
 	private class Filter implements FilenameFilter {
@@ -169,4 +210,84 @@ public class ImageProcess {
 		}
 	}
 
+	private void pixelFilesAdd(File file) {
+		synchronized (pixelFiles) {
+			pixelFiles.add(file);
+		}
+	}
+
+	private void rowFilesAdd(File file) {
+		synchronized (rowFiles) {
+			rowFiles.add(file);
+		}
+	}
+
+	private File pixelFilesGet(int index) {
+		File file;
+		synchronized (pixelFiles) {
+			file = pixelFiles.get(index);
+		}
+		return file;
+	}
+
+	private File rowFilesPoll() {
+		File file;
+		synchronized (rowFiles) {
+			file = rowFiles.poll();
+		}
+		return file;
+	}
+
+	private int pixelFilesSize() {
+		int size;
+		synchronized (pixelFiles) {
+			size = pixelFiles.size();
+		}
+		return size;
+	}
+
+	private int rowFilesSize() {
+		int size;
+		synchronized (rowFiles) {
+			size = rowFiles.size();
+		}
+		return size;
+	}
+
+	/**
+	 * 
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public String statementsTake() throws InterruptedException {
+		String statement;
+		synchronized (statements) {
+			statement = statements.take();
+		}
+		return statement;
+	}
+
+	/**
+	 * 
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public String statementsPoll() throws InterruptedException {
+		String statement;
+		synchronized (statements) {
+			statement = statements.poll();
+		}
+		return statement;
+	}
+
+	/**
+	 * 
+	 * @param person
+	 * @throws InterruptedException
+	 */
+	protected void statementsPut(String statement) throws InterruptedException {
+		synchronized (statements) {
+			statements.put(statement);
+		}
+	}
 }

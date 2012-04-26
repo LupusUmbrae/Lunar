@@ -1,6 +1,5 @@
 package main;
 
-import image.ImageCreateOverlay;
 import image.ImageProcess;
 import image.PaletteProcess;
 
@@ -8,11 +7,10 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
-import database.buildDataSets;
+import database.BuildDataSets;
 
-public class main {
+public class Lunar {
 
 	private final static String MYSQL_IP = "localhost";
 	private final static String MYSQL_PORT = "3306";
@@ -23,19 +21,11 @@ public class main {
 	/**
 	 * @param args
 	 */
-	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		try {
 			boolean buildDb = true;
 
-			Class.forName("com.mysql.jdbc.Driver");
-			String url = String.format("jdbc:mysql://%s:%s/%s", MYSQL_IP,
-					MYSQL_PORT, MYSQL_DB);
-			Connection conn = DriverManager.getConnection(url, MYSQL_USER,
-					MYSQL_PASSWORD);
-			System.out.println("MySQL Connected");
-
-			String path = "C:\\Users\\Robin\\git\\Lunar\\Lunar\\resources\\COLOR_SCALEBAR.TIF";
+			String path = "E:\\workspaces\\Lunar\\Lunar\\resources\\COLOR_SCALEBAR.TIF";
 			Double totalElevation = 19910d;
 			Double startElevationValue = -9150d;
 			if (buildDb) {
@@ -43,22 +33,23 @@ public class main {
 				palette.createPalette(path, totalElevation, startElevationValue);
 
 				ImageProcess image = new ImageProcess(palette);
-				image.generateData(
-						"C:\\Users\\Robin\\git\\Lunar\\Lunar\\resources\\WAC_CSHADE_E000N1800_016P.TIF",
-						conn);
+				image.generateData("E:\\workspaces\\Lunar\\Lunar\\resources\\WAC_CSHADE_E000N1800_016P.TIF");
 			}
-			buildDataSets dataSet = new buildDataSets();
-			dataSet.buildDataSet(100, conn);
+			BuildDataSets dataSet = new BuildDataSets();
+			dataSet.buildDataSet(100000);
+
+			System.out.println("Data set built... wooo!");
 			
-//			ArrayList<ArrayList<DataTile>> dataTiles = new ArrayList<ArrayList<DataTile>>();
-//			ArrayList<DataTile> dataTileRow = new ArrayList<DataTile>();
-//			dataTileRow.add(new DataTile(90, 180, 100, 10.0));
-//			dataTileRow.add(new DataTile(0, 180, 0, 10.0));
-//			dataTiles.add(dataTileRow);
-//			dataTiles.add(dataTileRow);
-//			ImageCreateOverlay image = new ImageCreateOverlay();
-//			image.createOverlay(dataTiles);
-			
+			// ArrayList<ArrayList<DataTile>> dataTiles = new
+			// ArrayList<ArrayList<DataTile>>();
+			// ArrayList<DataTile> dataTileRow = new ArrayList<DataTile>();
+			// dataTileRow.add(new DataTile(90, 180, 100, 10.0));
+			// dataTileRow.add(new DataTile(0, 180, 0, 10.0));
+			// dataTiles.add(dataTileRow);
+			// dataTiles.add(dataTileRow);
+			// ImageCreateOverlay image = new ImageCreateOverlay();
+			// image.createOverlay(dataTiles);
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
