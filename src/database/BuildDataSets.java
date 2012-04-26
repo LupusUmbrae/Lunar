@@ -38,13 +38,21 @@ public class BuildDataSets {
 		currentLat = LAT_MIN;
 		currentLon = LON_MIN;
 		while (currentLat < LAT_MAX) {
+			Double startLat;
+			Double endLat;
+			startLat = currentLat;
+			endLat = currentLat + latLonStep;
 			while (currentLon < LON_MAX) {
 				dataTiles = new ArrayList<ArrayList<DataTile>>();
 
+				Double startLon;
+				Double endLon;
+				startLon = currentLon;
+				endLon = currentLon + latLonStep;
+
 				// Get the data
 
-				dataTiles = getData(currentLat, currentLat + latLonStep,
-						currentLon, currentLon + latLonStep, conn);
+				dataTiles = getData(startLat, endLat, startLon, endLon, conn);
 
 				DataTile tile = processTile(dataTiles, 1896, currentLat,
 						currentLon);
@@ -135,6 +143,10 @@ public class BuildDataSets {
 	 * @return
 	 */
 	private int calcSlopeRank(Double slope) {
+		if(slope < 0){
+			slope *= -1;
+		}
+		
 		// (-0.5*(slope^2))+100
 		int rank = (int) (-0.5 * (Math.pow(slope, 2)) + 100);
 		return rank;

@@ -8,9 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,7 +20,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.sun.media.jai.codec.ImageCodec;
 import com.sun.media.jai.codec.ImageDecoder;
 
-import database.EnterBaseData;
+import database.threads.EnterBaseData;
 
 public class ImageProcess {
 
@@ -167,8 +165,8 @@ public class ImageProcess {
 	private void fillDb() throws IOException, SQLException,
 			InterruptedException {
 		File processedFileDir = new File(OUT_DIR + ROW_DIR + PROCESSED_DIR);
-		EnterBaseData baseData = new EnterBaseData(this);
-		baseData.run();
+		Thread baseData = new Thread(new EnterBaseData(this));
+		baseData.start();
 		int rowFileSize = rowFilesSize();
 		for (int i = 0; i < rowFileSize; i++) {
 			File row = rowFilesPoll();

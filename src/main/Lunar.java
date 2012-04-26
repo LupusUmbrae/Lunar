@@ -4,28 +4,20 @@ import image.ImageProcess;
 import image.PaletteProcess;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import database.BuildDataSets;
 
 public class Lunar {
 
-	private final static String MYSQL_IP = "localhost";
-	private final static String MYSQL_PORT = "3306";
-	private final static String MYSQL_DB = "lunar";
-	private final static String MYSQL_USER = "lunar";
-	private final static String MYSQL_PASSWORD = "lunar";
-
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		try {
-			boolean buildDb = true;
+			boolean buildDb = false;
 
-			String path = "E:\\workspaces\\Lunar\\Lunar\\resources\\COLOR_SCALEBAR.TIF";
+			String path = "resources\\COLOR_SCALEBAR.TIF";
 			Double totalElevation = 19910d;
 			Double startElevationValue = -9150d;
 			if (buildDb) {
@@ -33,7 +25,7 @@ public class Lunar {
 				palette.createPalette(path, totalElevation, startElevationValue);
 
 				ImageProcess image = new ImageProcess(palette);
-				image.generateData("E:\\workspaces\\Lunar\\Lunar\\resources\\WAC_CSHADE_E000N1800_016P.TIF");
+				image.generateData("resources\\WAC_CSHADE_E000N1800_016P.TIF");
 			}
 			BuildDataSets dataSet = new BuildDataSets();
 			dataSet.buildDataSet(100000);
