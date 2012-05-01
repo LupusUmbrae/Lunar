@@ -8,23 +8,23 @@ import java.sql.Statement;
 
 import database.DbConnection;
 
-public class EnterBaseData implements Runnable {
+public class EnterBaseDataThread implements Runnable {
 	private ImageProcess process;
 
-	public EnterBaseData(ImageProcess process) {
+	public EnterBaseDataThread(ImageProcess process) {
 		this.process = process;
 	}
 
 	@Override
 	public void run() {
+		DbConnection dbConn = new DbConnection();
+		Connection conn = dbConn.getConnection();
 		try {
 
 			String statement = process.statementsPoll();
 			while (statement == null) {
 				statement = process.statementsPoll();
 			}
-			DbConnection dbConn = new DbConnection();
-			Connection conn = dbConn.getConnection();
 
 			while (true) {
 				Statement stmt = conn.createStatement();
@@ -36,8 +36,8 @@ public class EnterBaseData implements Runnable {
 				} else {
 					Thread.sleep(1000);
 				}
-
 			}
+			dbConn.closeConnection(conn);
 			System.out.println("Base Data Thread finished");
 
 		} catch (InterruptedException e) {
@@ -47,6 +47,5 @@ public class EnterBaseData implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 }

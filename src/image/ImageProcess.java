@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import main.Lunar;
+
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -20,7 +22,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.sun.media.jai.codec.ImageCodec;
 import com.sun.media.jai.codec.ImageDecoder;
 
-import database.threads.EnterBaseData;
+import database.threads.EnterBaseDataThread;
 
 public class ImageProcess {
 
@@ -32,15 +34,6 @@ public class ImageProcess {
 	private Double pixelLat;
 	private Double pixelLon;
 
-	private final Double LAT_MAX = 90d;
-	private final Double LAT_MIN = -90d;
-	private final Double LON_MAX = 180d;
-	private final Double LON_MIN = -180d;
-
-	private final String OUT_DIR = "c:\\temp";
-	private final String PIXEL_DIR = "\\pixels";
-	private final String ROW_DIR = "\\row";
-	private final String PROCESSED_DIR = "\\processed";
 
 	private MultiKeyMap heightMap;
 
@@ -70,10 +63,10 @@ public class ImageProcess {
 	 */
 	private void createDirectories() {
 		// TODO: Do some checks here
-		File toCreate = new File(OUT_DIR + PIXEL_DIR + PROCESSED_DIR);
+		File toCreate = new File(Lunar.OUT_DIR + Lunar.PIXEL_DIR + Lunar.PROCESSED_DIR);
 		toCreate.mkdirs();
 		toCreate = null;
-		toCreate = new File(OUT_DIR + ROW_DIR + PROCESSED_DIR);
+		toCreate = new File(Lunar.OUT_DIR + Lunar.ROW_DIR + Lunar.PROCESSED_DIR);
 		toCreate.mkdirs();
 		toCreate = null;
 	}
@@ -106,7 +99,7 @@ public class ImageProcess {
 				row.add(ArrayUtils.toObject(rgb));
 			}
 			// Write row to disc
-			File file = new File(OUT_DIR + "\\pixel" + y + ".txt");
+			File file = new File(Lunar.OUT_DIR + "\\pixel" + y + ".txt");
 			BufferedWriter out = new BufferedWriter(new FileWriter(file));
 			for (Integer[] pixel : row) {
 				out.write(String.format("%d,%d,%d\n", pixel[0], pixel[1],
@@ -119,10 +112,10 @@ public class ImageProcess {
 	}
 
 	private void loadConvertImage() {
-		File filePlace = new File(OUT_DIR + ROW_DIR + "//");
+		File filePlace = new File(Lunar.OUT_DIR + Lunar.ROW_DIR + "//");
 		String[] files = filePlace.list(new Filter(".txt"));
 		for (String file : files) {
-			rowFilesAdd(new File(OUT_DIR + ROW_DIR + "//" + file));
+			rowFilesAdd(new File(Lunar.OUT_DIR + Lunar.ROW_DIR + "//" + file));
 		}
 		files = null;
 	}
@@ -137,7 +130,7 @@ public class ImageProcess {
 		for (int i = 0; i < pixelFilesSize(); i++) {
 			File pixelFile = pixelFilesGet(i);
 			// +1 just to make it the same numbering as pixel files
-			File heightFile = new File(OUT_DIR + "\\row" + (latPos + 1)
+			File heightFile = new File(Lunar.OUT_DIR + "\\row" + (latPos + 1)
 					+ ".txt");
 			BufferedReader in = new BufferedReader(new FileReader(pixelFile));
 			BufferedWriter out = new BufferedWriter(new FileWriter(heightFile));
@@ -145,8 +138,8 @@ public class ImageProcess {
 			line = in.readLine();
 			while (line != null) {
 				String[] rgbString = line.split(",");
-				Double lat = LAT_MAX - (pixelLat * latPos);
-				Double lon = LON_MIN + (pixelLon * lonPos);
+				Double lat = Lunar.LAT_MAX - (pixelLat * latPos);
+				Double lon = Lunar.LON_MIN + (pixelLon * lonPos);
 				Double height = palette.convertRgb(rgbString);
 				out.write(String.format("%s,%s,%s\n", lat.toString(),
 						lon.toString(), height.toString()));
@@ -164,8 +157,8 @@ public class ImageProcess {
 
 	private void fillDb() throws IOException, SQLException,
 			InterruptedException {
-		File processedFileDir = new File(OUT_DIR + ROW_DIR + PROCESSED_DIR);
-		Thread baseData = new Thread(new EnterBaseData(this));
+		File processedFileDir = new File(Lunar.OUT_DIR + Lunar.ROW_DIR + Lunar.PROCESSED_DIR);
+		Thread baseData = new Thread(new EnterBaseDataThread(this));
 		baseData.start();
 		int rowFileSize = rowFilesSize();
 		for (int i = 0; i < rowFileSize; i++) {

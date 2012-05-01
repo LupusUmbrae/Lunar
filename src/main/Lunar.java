@@ -10,6 +10,16 @@ import database.BuildDataSets;
 
 public class Lunar {
 
+	public static final Double LAT_MAX = 90d;
+	public static final Double LAT_MIN = -90d;
+	public static final Double LON_MAX = 180d;
+	public static final Double LON_MIN = -180d;
+
+	public static final String OUT_DIR = "c:\\temp";
+	public static final String PIXEL_DIR = "\\pixels";
+	public static final String ROW_DIR = "\\row";
+	public static final String PROCESSED_DIR = "\\processed";
+	
 	/**
 	 * @param args
 	 */

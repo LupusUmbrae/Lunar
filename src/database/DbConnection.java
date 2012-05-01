@@ -12,7 +12,7 @@ public class DbConnection {
 	private final static String MYSQL_USER = "lunar";
 	private final static String MYSQL_PASSWORD = "lunar";
 
-	int connectionPool = 5;
+	int connectionPool = 8;
 
 	public Connection getConnection() {
 		if (connectionPool > 0) {
