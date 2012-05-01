@@ -14,39 +14,40 @@ import database.storage.ThreadStorage;
 
 public class GetPixelAreaThread implements Runnable {
 
-	private Connection conn;
 
 	@Override
 	public void run() {
 
 		DbConnection dbConn = new DbConnection();
-		conn = dbConn.getConnection();
+		Connection conn = dbConn.getConnection();
+		try {
+			while (true) {
+				DataQuery sqlQuery = ThreadStorage.pollSqlQueries();
+				if (sqlQuery == null && ThreadStorage.isEndQueries()) {
+					break;
+				} else if (sqlQuery != null) {
 
-		while (true) {
-			DataQuery sqlQuery = ThreadStorage.pollSqlQueries();
-			if (sqlQuery == null && ThreadStorage.isEndQueries()) {
-				break;
-			} else if (sqlQuery != null) {
-				try {
 					Statement stmt = conn.createStatement();
 					ResultSet results = stmt.executeQuery(sqlQuery
 							.getStatement());
 					processTile(results, sqlQuery.getLat(), sqlQuery.getLon());
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					results = null;
+					stmt.close();
 				}
-
 			}
-		}
-		try {
-			dbConn.closeConnection(conn);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				dbConn.closeConnection(conn);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -62,7 +63,7 @@ public class GetPixelAreaThread implements Runnable {
 			Long lat = results.getLong("LAT");
 			Long lon = results.getLong("LON");
 			Long height = results.getLong("HEIGHT");
-			if (lat != preLat) {
+			if (!lat.equals(preLat)) {
 				dataTileRow = new ArrayList<DataTile>();
 				dataTileResults.add(dataTileRow);
 				preLat = lat;
@@ -72,9 +73,8 @@ public class GetPixelAreaThread implements Runnable {
 
 		}
 
-		ThreadStorage
-				.putDataTileResults(new RawTile(dataTileResults, latStart, lonStart));
+		ThreadStorage.putDataTileResults(new RawTile(dataTileResults, latStart,
+				lonStart));
 		dataTileResults = null;
-		dataTileResults = new ArrayList<ArrayList<DataTile>>();
 	}
 }

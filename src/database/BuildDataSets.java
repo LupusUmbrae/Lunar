@@ -54,11 +54,13 @@ public class BuildDataSets {
 		Thread queryThreadC = new Thread(new GetPixelAreaThread());
 		Thread queryThreadD = new Thread(new GetPixelAreaThread());
 		Thread queryThreadE = new Thread(new GetPixelAreaThread());
+		Thread queryThreadF = new Thread(new GetPixelAreaThread());
 
-		Thread processTileThread = new Thread(new ProcessTileThread(distance,
-				latLonStep, latLonStep));
+		Thread processTileThreadA = new Thread(new ProcessTileThread(distance));
+		Thread processTileThreadB = new Thread(new ProcessTileThread(distance));
 
-		Thread enterTileSetThread = new Thread(new EnterTileSetThread(db));
+		Thread enterTileSetThreadA = new Thread(new EnterTileSetThread(db));
+		Thread enterTileSetThreadB = new Thread(new EnterTileSetThread(db));
 
 		// Start em up
 		queryThreadA.start();
@@ -66,10 +68,13 @@ public class BuildDataSets {
 		queryThreadC.start();
 		queryThreadD.start();
 		queryThreadE.start();
+		queryThreadF.start();
 
-		processTileThread.start();
+		processTileThreadA.start();
+		processTileThreadB.start();
 
-		enterTileSetThread.start();
+		enterTileSetThreadA.start();
+		enterTileSetThreadB.start();
 
 		// Lets create the statements
 		currentLat = LAT_MIN;
@@ -80,7 +85,7 @@ public class BuildDataSets {
 			startLat = currentLat;
 			currentLon = LON_MIN;
 			endLat = currentLat + latLonStep;
-			
+
 			while (currentLon < LON_MAX) {
 				Double startLon;
 				Double endLon;
@@ -112,7 +117,7 @@ public class BuildDataSets {
 		while (alive) {
 			if (!queryThreadA.isAlive() && !queryThreadB.isAlive()
 					&& !queryThreadC.isAlive() && !queryThreadD.isAlive()
-					&& !queryThreadE.isAlive()) {
+					&& !queryThreadE.isAlive() && !queryThreadF.isAlive()) {
 				alive = false;
 			} else {
 				Thread.sleep(10000);
@@ -122,13 +127,13 @@ public class BuildDataSets {
 		System.out.println("Data collected from database");
 
 		ThreadStorage.setEndProcess(true);
-		while (processTileThread.isAlive()) {
+		while (processTileThreadA.isAlive() && processTileThreadB.isAlive()) {
 			Thread.sleep(10000);
 		}
 		System.out.println("Data processed and ready for re-entry to database");
 
 		ThreadStorage.setEndStatement(true);
-		while (enterTileSetThread.isAlive()) {
+		while (enterTileSetThreadA.isAlive() && enterTileSetThreadB.isAlive()) {
 			Thread.sleep(10000);
 		}
 		System.out.println("Data entered into database");

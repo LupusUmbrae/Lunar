@@ -30,6 +30,7 @@ public class EnterBaseDataThread implements Runnable {
 				Statement stmt = conn.createStatement();
 				statement = process.statementsPoll();
 				if (statement != null && statement.matches("end")) {
+					stmt.close();
 					break;
 				} else if (statement != null) {
 					stmt.execute(statement);
@@ -37,7 +38,7 @@ public class EnterBaseDataThread implements Runnable {
 					Thread.sleep(1000);
 				}
 			}
-			dbConn.closeConnection(conn);
+			
 			System.out.println("Base Data Thread finished");
 
 		} catch (InterruptedException e) {
@@ -46,6 +47,13 @@ public class EnterBaseDataThread implements Runnable {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			try {
+				dbConn.closeConnection(conn);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 }
