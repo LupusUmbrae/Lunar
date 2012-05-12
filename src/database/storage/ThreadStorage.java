@@ -68,8 +68,6 @@ public class ThreadStorage {
 			throws InterruptedException {
 		synchronized (dataTileResults) {
 			dataTileResults.put(dataTileResult);
-			System.out.println("Data Tile Results Size: "
-					+ dataTileResults.size());
 		}
 
 	}
@@ -104,8 +102,6 @@ public class ThreadStorage {
 			throws InterruptedException {
 		synchronized (processedTiles) {
 			processedTiles.put(tile);
-			System.out
-					.println("Processed Tiles Size: " + processedTiles.size());
 		}
 	}
 

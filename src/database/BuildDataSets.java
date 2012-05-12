@@ -38,7 +38,8 @@ public class BuildDataSets {
 		int latLonStep = (int) (360 / (MOON_CIRC / size));
 		Double currentLat = LAT_MIN;
 		Double currentLon = LON_MIN;
-		Double distance = MOON_CIRC / (360 / latLonStep);
+		// This is the distance between two pixels
+		Double distance = MOON_CIRC / 5760d;
 		String db = DataSets.getDb(size);
 		boolean alive = true;
 		DataQuery dataQuery;

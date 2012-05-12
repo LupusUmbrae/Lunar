@@ -25,7 +25,7 @@ public class ImageCreateOverlay {
 			for (int y = 0; y < dataTiles2.size(); y++) {
 				DataTile dataTile = dataTiles2.get(y);
 				int rank = dataTile.getRank();
-				image.setRGB(x, y, getRgb(rank));
+				image.setRGB(y, x, getRgb(rank));
 			}
 		}
 
@@ -33,6 +33,7 @@ public class ImageCreateOverlay {
 	}
 
 	public int getRgb(int rank) {
+		rank = rank < 0 ? 0 : rank;
 		String rgbString = "";
 		Integer rgb = 0;
 		int red = (int) (255 - (255 * (rank / 100d)));

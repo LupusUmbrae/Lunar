@@ -64,12 +64,18 @@ public class ProcessTileThread implements Runnable {
 
 				// Calc right slope first
 				opp = centre - right;
-				slope = Math.toDegrees(Math.tan((opp / distance)));
+				if (opp < 0) {
+					opp *= -1;
+				}
+				slope = Math.toDegrees(Math.atan((opp / distance)));
 				rankArray.add(calcSlopeRank(slope));
 
 				// Calc below slope
 				opp = centre - below;
-				slope = Math.toDegrees(Math.tan((opp / distance)));
+				if (opp < 0) {
+					opp *= -1;
+				}
+				slope = Math.toDegrees(Math.atan((opp / distance)));
 				rankArray.add(calcSlopeRank(slope));
 			}
 		}
@@ -98,9 +104,6 @@ public class ProcessTileThread implements Runnable {
 
 	private int calcSlopeRank(Double slope) {
 		Double calcSlope = slope;
-		if (calcSlope < 0) {
-			calcSlope *= -1;
-		}
 
 		// (-0.5*(slope^2))+100
 		int rank = (int) (-0.5 * (Math.pow(calcSlope, 2)) + 100);
