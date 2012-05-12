@@ -32,7 +32,7 @@ public class Lunar {
 	public static void main(String[] args) {
 		try {
 			boolean buildDb = false;
-			boolean buildSet = true;
+			boolean buildSet = false;
 
 			String path = "resources\\COLOR_SCALEBAR.TIF";
 			Double totalElevation = 19910d;
@@ -70,22 +70,14 @@ public class Lunar {
 
 			results.beforeFirst();
 
-			Long preLat = 0L;
-			ArrayList<DataTile> dataTileRow = new ArrayList<DataTile>();
-			ArrayList<ArrayList<DataTile>> dataTileResults = new ArrayList<ArrayList<DataTile>>();
+			ArrayList<DataTile> dataTiles = new ArrayList<DataTile>();
 			while (results.next()) {
 				Long lat = results.getLong("LAT");
 				Long lon = results.getLong("LON");
 				Long height = results.getLong("HEIGHT");
 				int rank = results.getInt("RANK");
-				if (!lat.equals(preLat)) {
-					dataTileRow = new ArrayList<DataTile>();
-					dataTileResults.add(dataTileRow);
-					preLat = lat;
-				}
-				dataTileRow.add(new DataTile(lat.doubleValue(), lon
-						.doubleValue(), rank, height.doubleValue()));
-
+				dataTiles.add(new DataTile(lat.doubleValue(),
+						lon.doubleValue(), rank, height.doubleValue()));
 			}
 			stmt.close();
 			try {
@@ -95,7 +87,7 @@ public class Lunar {
 				e.printStackTrace();
 			}
 			ImageCreateOverlay image = new ImageCreateOverlay();
-			image.createOverlay(dataTileResults);
+			image.createOverlay(dataTiles, 3, 3);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
