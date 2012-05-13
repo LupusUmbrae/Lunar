@@ -11,11 +11,11 @@ import main.DataTile;
 
 public class ImageCreateOverlay {
 
-	private final String OUT_DIR = "c:\\temp";
+	private final String OUT_DIR = "resources";
 
 	public void createOverlay(ArrayList<DataTile> dataTiles, int latStep,
 			int lonStep) throws IOException {
-		File outputImage = new File(OUT_DIR + "\\lunar.png");
+		File outputImage = new File(OUT_DIR + "\\lunar_" + System.currentTimeMillis() + ".png");
 		int imageWidth = 360 / lonStep;
 		int imageHeight = 180 / latStep;
 

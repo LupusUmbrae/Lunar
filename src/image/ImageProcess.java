@@ -34,9 +34,6 @@ public class ImageProcess {
 	private Double pixelLat;
 	private Double pixelLon;
 
-
-	private MultiKeyMap heightMap;
-
 	private Raster image;
 
 	private static ArrayList<File> pixelFiles = new ArrayList<File>();
@@ -72,7 +69,6 @@ public class ImageProcess {
 	}
 
 	private void loadImage(String filename) throws IOException {
-		heightMap = new MultiKeyMap();
 		File file = new File(filename);
 
 		ImageDecoder dec = ImageCodec.createImageDecoder("tiff", file, null);
@@ -87,7 +83,6 @@ public class ImageProcess {
 	// Convert
 	private void convertImage() throws IOException {
 		// TODO: Thread this
-		heightMap = new MultiKeyMap();
 		for (int y = 0; y < pixelHeight; y++) {
 			ArrayList<Integer[]> row = new ArrayList<Integer[]>();
 			for (int x = 0; x < pixelWidth; x++) {
