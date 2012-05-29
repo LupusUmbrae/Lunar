@@ -6,26 +6,26 @@ import main.DataTile;
 
 public class RawTile {
 
-	private ArrayList<ArrayList<DataTile>> rwaDataTile;
-	private Double lat;
-	private Double lon;
+	private ArrayList<ArrayList<DataTile>> rawDataTile;
+	private float lat;
+	private float lon;
 
-	public RawTile(ArrayList<ArrayList<DataTile>> rwaDataTile, Double lat,
-			Double lon) {
-		this.rwaDataTile = rwaDataTile;
+	public RawTile(ArrayList<ArrayList<DataTile>> rawDataTile, float lat,
+			float lon) {
+		this.rawDataTile = rawDataTile;
 		this.lat = lat;
 		this.lon = lon;
 	}
 
 	public ArrayList<ArrayList<DataTile>> getRwaDataTile() {
-		return rwaDataTile;
+		return rawDataTile;
 	}
 
-	public Double getLat() {
+	public float getLat() {
 		return lat;
 	}
 
-	public Double getLon() {
+	public float getLon() {
 		return lon;
 	}
 }

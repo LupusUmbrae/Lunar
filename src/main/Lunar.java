@@ -47,7 +47,7 @@ public class Lunar {
 
 			if (buildSet) {
 				BuildDataSets dataSet = new BuildDataSets();
-				dataSet.buildDataSet(100000);
+				dataSet.buildDataSet(30000);
 
 				System.out.println("Data set built... wooo!");
 			}
@@ -59,7 +59,7 @@ public class Lunar {
 			try {
 				stmt = conn.createStatement();
 				results = stmt
-						.executeQuery("SELECT * FROM set_100 ORDER BY LAT, LON");
+						.executeQuery("SELECT * FROM set_30 ORDER BY LAT, LON");
 
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -72,12 +72,12 @@ public class Lunar {
 
 			ArrayList<DataTile> dataTiles = new ArrayList<DataTile>();
 			while (results.next()) {
-				Long lat = results.getLong("LAT");
-				Long lon = results.getLong("LON");
+				Float lat = results.getFloat("LAT");
+				Float lon = results.getFloat("LON");
 				Long height = results.getLong("HEIGHT");
 				int rank = results.getInt("RANK");
-				dataTiles.add(new DataTile(lat.doubleValue(),
-						lon.doubleValue(), rank, height.doubleValue()));
+				dataTiles
+						.add(new DataTile(lat, lon, rank, height.doubleValue()));
 			}
 			stmt.close();
 			try {
@@ -87,7 +87,7 @@ public class Lunar {
 				e.printStackTrace();
 			}
 			ImageCreateOverlay image = new ImageCreateOverlay();
-			image.createOverlay(dataTiles, 3, 3);
+			image.createOverlay(dataTiles, 0.99f, 0.99f);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

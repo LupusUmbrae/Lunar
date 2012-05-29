@@ -4,32 +4,32 @@ import java.util.Comparator;
 
 public class DataTile implements Comparator<DataTile> {
 
-	private Double lat;
+	private Float lat;
 
-	private Double lon;
+	private Float lon;
 
 	private int rank;
 
 	private Double height;
 
-	public DataTile(Double lat, Double lon, int rank, Double height) {
+	public DataTile(Float lat, Float lon, int rank, Double height) {
 		this.lat = lat;
 		this.lon = lon;
 		this.rank = rank;
 		this.height = height;
 	}
 	
-	public DataTile(Double lat, Double lon, Double height) {
+	public DataTile(Float lat, Float lon, Double height) {
 		this.lat = lat;
 		this.lon = lon;
 		this.height = height;
 	}
 
-	public Double getLat() {
+	public Float getLat() {
 		return lat;
 	}
 
-	public Double getLon() {
+	public Float getLon() {
 		return lon;
 	}
 

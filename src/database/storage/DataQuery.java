@@ -3,10 +3,10 @@ package database.storage;
 public class DataQuery {
 
 	private String statement;
-	private Double lat;
-	private Double lon;
+	private float lat;
+	private float lon;
 
-	public DataQuery(String statement, Double lat, Double lon) {
+	public DataQuery(String statement, float lat, float lon) {
 		this.lat = lat;
 		this.lon = lon;
 		this.statement = statement;
@@ -16,11 +16,11 @@ public class DataQuery {
 		return statement;
 	}
 
-	public Double getLat() {
+	public float getLat() {
 		return lat;
 	}
 
-	public Double getLon() {
+	public float getLon() {
 		return lon;
 	}
 }

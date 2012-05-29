@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import analysis.threads.ProcessTileThread;
@@ -17,11 +18,11 @@ import main.DataTile;
 
 public class BuildDataSets {
 	// in meters!!
-	private final Double MOON_CIRC = 10921000d;
-	private final Double LAT_MAX = 90d;
-	private final Double LAT_MIN = -90d;
-	private final Double LON_MAX = 180d;
-	private final Double LON_MIN = -180d;
+	private final long MOON_CIRC = 10921000;
+	private final int LAT_MAX = 90;
+	private final int LAT_MIN = -90;
+	private final int LON_MAX = 180;
+	private final int LON_MIN = -180;
 
 	/**
 	 * Get base data from database and create a dataset for analysis
@@ -34,18 +35,23 @@ public class BuildDataSets {
 	public void buildDataSet(int size) throws SQLException,
 			InterruptedException {
 		DbConnection dbConn = new DbConnection();
-
-		int latLonStep = (int) (360 / (MOON_CIRC / size));
-		Double currentLat = LAT_MIN;
-		Double currentLon = LON_MIN;
+		DecimalFormat dec = new DecimalFormat();
+		dec.setMaximumFractionDigits(2);
+		String latStepString = dec.format((360f / (MOON_CIRC / size)));
+		String lonStepString = dec.format((360f / (MOON_CIRC / size)));
+		float latStep = Float.parseFloat(latStepString);
+		float lonStep = Float.parseFloat(lonStepString);
+		float currentLat = LAT_MIN;
+		float currentLon = LON_MIN;
 		// This is the distance between two pixels
-		Double distance = MOON_CIRC / 5760d;
+		// TODO: Move this into the database
+		int distance = (int) (MOON_CIRC / 5760);
 		String db = DataSets.getDb(size);
 		boolean alive = true;
 		DataQuery dataQuery;
 
 		Connection conn = dbConn.getConnection();
-		updateSetConfig(conn, db, latLonStep, latLonStep);
+		updateSetConfig(conn, db, latStep, lonStep);
 		dbConn.closeConnection(conn);
 
 		// Create query threads
@@ -81,23 +87,23 @@ public class BuildDataSets {
 		currentLat = LAT_MIN;
 		currentLon = LON_MIN;
 		while (currentLat < LAT_MAX) {
-			Double startLat;
-			Double endLat;
+			float startLat;
+			float endLat;
 			startLat = currentLat;
 			currentLon = LON_MIN;
-			endLat = currentLat + latLonStep;
+			endLat = currentLat + latStep;
 
 			while (currentLon < LON_MAX) {
-				Double startLon;
-				Double endLon;
+				float startLon;
+				float endLon;
 				startLon = currentLon;
-				endLon = currentLon + latLonStep;
+				endLon = currentLon + lonStep;
 
 				try {
 
 					String stmtBuilder = String
-							.format("SELECT * FROM base_data WHERE (LAT BETWEEN %f AND %f) AND (LON BETWEEN %f AND %f) ORDER BY LAT, LON",
-									startLat, endLat, startLon, endLon);
+							.format("SELECT * FROM base_data WHERE (LAT BETWEEN %s AND %s) AND (LON BETWEEN %s AND %s) ORDER BY LAT, LON",
+									dec.format(startLat), dec.format(endLat), dec.format(startLon), dec.format(endLon));
 					dataQuery = new DataQuery(stmtBuilder, currentLat,
 							currentLon);
 					ThreadStorage.putSqlQueries(dataQuery);
@@ -106,9 +112,9 @@ public class BuildDataSets {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				currentLon += latLonStep;
+				currentLon += lonStep;
 			}
-			currentLat += latLonStep;
+			currentLat += latStep;
 		}
 
 		System.out.println("Select statements compelted");
@@ -140,11 +146,11 @@ public class BuildDataSets {
 		System.out.println("Data entered into database");
 	}
 
-	private void updateSetConfig(Connection conn, String setName, int latStep,
-			int lonStep) throws SQLException {
+	private void updateSetConfig(Connection conn, String setName,
+			float latStep, float lonStep) throws SQLException {
 		Statement stmt = conn.createStatement();
 		String stmtBuilder = String
-				.format("UPDATE set_config SET LAT_STEP=%d, LON_STEP=%s WHERE DATA_SET='%s';",
+				.format("UPDATE set_config SET LAT_STEP=%f, LON_STEP=%f WHERE DATA_SET='%s';",
 						latStep, lonStep, setName);
 		stmt.executeUpdate(stmtBuilder);
 	}

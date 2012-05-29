@@ -4,9 +4,9 @@ import java.util.HashMap;
 
 public enum DataSets {
 
-	K_METERS_10("", 10000), K_METERS_20("", 20000), K_METERS_30("", 30000), K_METERS_40(
-			"", 40000), K_METERS_50("", 50000), K_METERS_100("set_100", 100000), K_METERS_200(
-			"", 200000);
+	K_METERS_10("set_10", 10000), K_METERS_20("set_20", 20000), K_METERS_30("set_30", 30000), K_METERS_40(
+			"set_40", 40000), K_METERS_50("set_50", 50000), K_METERS_100("set_100", 100000), K_METERS_200(
+			"set_200", 200000);
 
 	private int meters;
 	private String dbName;

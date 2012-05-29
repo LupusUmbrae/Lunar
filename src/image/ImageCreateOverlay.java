@@ -13,19 +13,19 @@ public class ImageCreateOverlay {
 
 	private final String OUT_DIR = "resources";
 
-	public void createOverlay(ArrayList<DataTile> dataTiles, int latStep,
-			int lonStep) throws IOException {
+	public void createOverlay(ArrayList<DataTile> dataTiles, float latStep,
+			float lonStep) throws IOException {
 		File outputImage = new File(OUT_DIR + "\\lunar_" + System.currentTimeMillis() + ".png");
-		int imageWidth = 360 / lonStep;
-		int imageHeight = 180 / latStep;
+		int imageWidth = (int) (360 / lonStep);
+		int imageHeight = (int) (180 / latStep);
 
 		BufferedImage image = new BufferedImage(imageWidth, imageHeight,
 				BufferedImage.TYPE_INT_RGB);
 
 		for (DataTile dataTile : dataTiles) {
 			int rank = dataTile.getRank();
-			int x = (dataTile.getLon().intValue() + 180) / lonStep;
-			int y = (dataTile.getLat().intValue() + 90) / latStep;
+			int x = (int) ((dataTile.getLon().intValue() + 180) / lonStep);
+			int y = (int) ((dataTile.getLat().intValue() + 90) / latStep);
 			image.setRGB(x, y, getRgb(rank));
 		}
 

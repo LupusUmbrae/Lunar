@@ -8,9 +8,9 @@ import database.storage.ThreadStorage;
 
 public class ProcessTileThread implements Runnable {
 
-	private Double distance;
+	private int distance;
 
-	public ProcessTileThread(Double distance) {
+	public ProcessTileThread(int distance) {
 		this.distance = distance;
 	}
 
@@ -37,8 +37,8 @@ public class ProcessTileThread implements Runnable {
 
 	}
 
-	private void processTile(ArrayList<ArrayList<DataTile>> tiles, Double lat,
-			Double lon) throws InterruptedException {
+	private void processTile(ArrayList<ArrayList<DataTile>> tiles, float lat,
+			float lon) throws InterruptedException {
 
 		int rankAverage;
 		int rankTotal = 0;
@@ -46,7 +46,7 @@ public class ProcessTileThread implements Runnable {
 		Double heightTotal = 0d;
 
 		ArrayList<Integer> rankArray = new ArrayList<Integer>();
-		ArrayList<Double> heightArray = new ArrayList<Double>();
+		ArrayList<Float> heightArray = new ArrayList<Float>();
 
 		for (int x = 0; x < tiles.size() - 1; x++) {
 
@@ -54,11 +54,11 @@ public class ProcessTileThread implements Runnable {
 
 			for (int y = 0; y < tileRow.size() - 1; y++) {
 
-				Double slope;
-				Double opp;
-				Double centre = tileRow.get(y).getHeight();
-				Double right = tileRow.get(y + 1).getHeight();
-				Double below = tiles.get(x).get(y).getHeight();
+				float slope;
+				float opp;
+				float centre = tileRow.get(y).getHeight().floatValue();
+				float right = tileRow.get(y + 1).getHeight().floatValue();
+				float below = tiles.get(x).get(y).getHeight().floatValue();
 
 				heightArray.add(centre);
 
@@ -67,7 +67,7 @@ public class ProcessTileThread implements Runnable {
 				if (opp < 0) {
 					opp *= -1;
 				}
-				slope = Math.toDegrees(Math.atan((opp / distance)));
+				slope = (float) Math.toDegrees(Math.atan((opp / distance)));
 				rankArray.add(calcSlopeRank(slope));
 
 				// Calc below slope
@@ -75,7 +75,7 @@ public class ProcessTileThread implements Runnable {
 				if (opp < 0) {
 					opp *= -1;
 				}
-				slope = Math.toDegrees(Math.atan((opp / distance)));
+				slope = (float) Math.toDegrees(Math.atan((opp / distance)));
 				rankArray.add(calcSlopeRank(slope));
 			}
 		}
@@ -86,13 +86,12 @@ public class ProcessTileThread implements Runnable {
 		}
 		rankAverage = rankTotal / rankArray.size();
 
-		for (Double height : heightArray) {
+		for (Float height : heightArray) {
 			heightTotal += height;
 		}
 		finalHeight = heightTotal / heightArray.size();
 
-		DataTile dataTile = new DataTile(lat.doubleValue(), lon.doubleValue(),
-				rankAverage, finalHeight);
+		DataTile dataTile = new DataTile(lat, lon, rankAverage, finalHeight);
 		ThreadStorage.putProcessedTile(dataTile);
 
 		// Clean up
@@ -102,11 +101,8 @@ public class ProcessTileThread implements Runnable {
 
 	}
 
-	private int calcSlopeRank(Double slope) {
-		Double calcSlope = slope;
-
-		// (-0.5*(slope^2))+100
-		int rank = (int) (-0.5 * (Math.pow(calcSlope, 2)) + 100);
+	private int calcSlopeRank(float slope) {
+		int rank = (int) (-0.5 * (Math.pow(slope, 2)) + 100);
 		return rank;
 	}
 

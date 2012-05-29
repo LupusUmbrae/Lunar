@@ -14,7 +14,6 @@ import database.storage.ThreadStorage;
 
 public class GetPixelAreaThread implements Runnable {
 
-
 	@Override
 	public void run() {
 
@@ -51,25 +50,24 @@ public class GetPixelAreaThread implements Runnable {
 		}
 	}
 
-	private void processTile(ResultSet results, Double latStart, Double lonStart)
+	private void processTile(ResultSet results, float latStart, float lonStart)
 			throws SQLException, InterruptedException {
 		ArrayList<ArrayList<DataTile>> dataTileResults = new ArrayList<ArrayList<DataTile>>();
 
 		results.beforeFirst();
 
-		Long preLat = 0L;
+		Float preLat = 0f;
 		ArrayList<DataTile> dataTileRow = new ArrayList<DataTile>();
 		while (results.next()) {
-			Long lat = results.getLong("LAT");
-			Long lon = results.getLong("LON");
+			Float lat = results.getFloat("LAT");
+			Float lon = results.getFloat("LON");
 			Long height = results.getLong("HEIGHT");
 			if (!lat.equals(preLat)) {
 				dataTileRow = new ArrayList<DataTile>();
 				dataTileResults.add(dataTileRow);
 				preLat = lat;
 			}
-			dataTileRow.add(new DataTile(lat.doubleValue(), lon.doubleValue(),
-					height.doubleValue()));
+			dataTileRow.add(new DataTile(lat, lon, height.doubleValue()));
 
 		}
 
