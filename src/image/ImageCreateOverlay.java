@@ -7,13 +7,15 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.FileUtils;
+
 import main.DataTile;
 
 public class ImageCreateOverlay {
 
 	private final String OUT_DIR = "resources";
 
-	public void createOverlay(ArrayList<DataTile> dataTiles, float latStep,
+	public File createOverlay(ArrayList<DataTile> dataTiles, float latStep,
 			float lonStep) throws IOException {
 		File outputImage = new File(OUT_DIR + "\\lunar_" + System.currentTimeMillis() + ".png");
 		int imageWidth = (int) (360 / lonStep);
@@ -28,8 +30,8 @@ public class ImageCreateOverlay {
 			int y = (int) ((dataTile.getLat().intValue() + 90) / latStep);
 			image.setRGB(x, y, getRgb(rank));
 		}
-
 		ImageIO.write(image, "png", outputImage);
+		return outputImage;
 	}
 
 	private int getRgb(int rank) {

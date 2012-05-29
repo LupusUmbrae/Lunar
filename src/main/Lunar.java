@@ -4,6 +4,7 @@ import image.ImageCreateOverlay;
 import image.ImageProcess;
 import image.PaletteProcess;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -11,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import map.CreateKml;
 import database.BuildDataSets;
 import database.DbConnection;
 
@@ -33,6 +35,8 @@ public class Lunar {
 		try {
 			boolean buildDb = false;
 			boolean buildSet = false;
+			
+			File outImage;
 
 			String path = "resources\\COLOR_SCALEBAR.TIF";
 			Double totalElevation = 19910d;
@@ -87,7 +91,10 @@ public class Lunar {
 				e.printStackTrace();
 			}
 			ImageCreateOverlay image = new ImageCreateOverlay();
-			image.createOverlay(dataTiles, 0.99f, 0.99f);
+			outImage = image.createOverlay(dataTiles, 0.99f, 0.99f);
+
+			CreateKml map = new CreateKml();
+			map.CreateKmz("test", outImage);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
