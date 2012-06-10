@@ -26,7 +26,9 @@ public class PaletteProcess {
 	private MultiKeyMap evaluationMap = new MultiKeyMap();
 	private HashMap<Integer, ArrayList<Integer>> redMap = new HashMap<Integer, ArrayList<Integer>>();
 	private MultiKeyMap greenMap = new MultiKeyMap();
-
+	
+	private ArrayList<int[]> palette;
+	
 	public PaletteProcess() throws IOException {
 
 	}
@@ -37,6 +39,8 @@ public class PaletteProcess {
 
 		// int totalElevation = 19910;
 		// int startElevationValue = -9150;
+		
+		palette = new ArrayList<int[]>();
 
 		File file = new File(filename);
 		ImageDecoder dec = ImageCodec.createImageDecoder("tiff", file, null);
@@ -52,6 +56,7 @@ public class PaletteProcess {
 			int[] rgb = null;
 			rgb = image.getPixel(0, y, rgb);
 
+			palette.add(rgb);
 			evaluationMap.put(rgb[0], rgb[1], rgb[2], i);
 
 			ArrayList<Integer> greens;
