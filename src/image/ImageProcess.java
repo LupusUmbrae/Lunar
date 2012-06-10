@@ -10,7 +10,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import main.Lunar;
@@ -41,11 +40,11 @@ public class ImageProcess {
 	}
 
 	public void generateData(String filename) throws Exception {
-		//createDirectories();
-		//loadImage(filename);
-		//convertImage();
-		loadConvertImage();
-		//convertRgb();
+		createDirectories();
+		loadImage(filename);
+		convertImage();
+		// loadConvertImage();
+		convertRgb();
 
 		Thread readFiles1 = new Thread(new ReadRowFilesThread());
 		Thread readFiles2 = new Thread(new ReadRowFilesThread());
@@ -161,7 +160,7 @@ public class ImageProcess {
 
 		File processedFileDir = new File(Lunar.OUT_DIR + Lunar.PIXEL_DIR
 				+ Lunar.PROCESSED_DIR);
-		
+
 		for (int i = 0; i < ImageStorage.pixelFilesSize(); i++) {
 			File pixelFile = ImageStorage.pixelFilesGet(i);
 			// +1 just to make it the same numbering as pixel files
@@ -173,14 +172,15 @@ public class ImageProcess {
 			line = in.readLine();
 			while (line != null) {
 				String[] rgbString = line.split(",");
-				Float lat = Lunar.LAT_MAX - (pixelLat * latPos);
+				Float lat = Lunar.LAT_MIN + (pixelLat * latPos);
 				Float lon = Lunar.LON_MIN + (pixelLon * lonPos);
 				Float height = palette.convertRgb(rgbString);
 				out.write(String.format("%s,%s,%s\n", lat.toString(),
 						lon.toString(), height.toString()));
 				line = in.readLine();
 				lonPos++;
-				FileUtils.moveFileToDirectory(pixelFile, processedFileDir, false);
+				FileUtils.moveFileToDirectory(pixelFile, processedFileDir,
+						false);
 			}
 			in.close();
 			out.close();
