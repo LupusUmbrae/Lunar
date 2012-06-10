@@ -7,8 +7,6 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FileUtils;
-
 import main.DataTile;
 
 public class ImageCreateOverlay {
@@ -17,7 +15,8 @@ public class ImageCreateOverlay {
 
 	public File createOverlay(ArrayList<DataTile> dataTiles, float latStep,
 			float lonStep) throws IOException {
-		File outputImage = new File(OUT_DIR + "\\lunar_" + System.currentTimeMillis() + ".png");
+		File outputImage = new File(OUT_DIR + "\\lunar_"
+				+ System.currentTimeMillis() + ".png");
 		int imageWidth = (int) (360 / lonStep);
 		int imageHeight = (int) (180 / latStep);
 
@@ -26,9 +25,22 @@ public class ImageCreateOverlay {
 
 		for (DataTile dataTile : dataTiles) {
 			int rank = dataTile.getRank();
-			int x = (int) ((dataTile.getLon().intValue() + 180) / lonStep);
-			int y = (int) ((dataTile.getLat().intValue() + 90) / latStep);
-			image.setRGB(x, y, getRgb(rank));
+			Float lon = dataTile.getLon();
+			Float lat = dataTile.getLat() * -1;
+			if (lon > 179) {
+				lon -= 180;
+			} else {
+				lon += 180;
+			}
+			int x = (int) ((lon.intValue()) / lonStep);
+			int y = (int) ((lat.intValue() + 89) / latStep);
+			try {
+				image.setRGB(x, y, getRgb(rank));
+			} catch (ArrayIndexOutOfBoundsException e) {
+				System.out.println("x: " + x + ", Y: " + y);
+				break;
+			}
+
 		}
 		ImageIO.write(image, "png", outputImage);
 		return outputImage;
@@ -40,8 +52,17 @@ public class ImageCreateOverlay {
 		Integer rgb = 0;
 		int red = (int) (255 - (255 * (rank / 100d)));
 		int blue = (int) (255 * (rank / 100d));
-
-		rgbString += String.format("%x00%x", red, blue);
+		String redString = String.format("%x", red);
+		String blueString = String.format("%x", blue);
+		if(redString.length() == 1){
+			redString = "0" + redString;
+		}
+		
+		if(blueString.length() == 1){
+			blueString = "0" + blueString;
+		}
+		
+		rgbString += redString + "00" + blueString;
 		rgb = Integer.parseInt(rgbString, 16);
 		return rgb;
 	}

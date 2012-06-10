@@ -60,7 +60,8 @@ public class GetPixelAreaThread implements Runnable {
 		ArrayList<DataTile> dataTileRow = new ArrayList<DataTile>();
 		while (results.next()) {
 			Float lat = results.getFloat("LAT");
-			Float lon = results.getFloat("LON");
+			Float lon = results.getFloat("LON") > 180 ? 180f - results
+					.getFloat("LON") : results.getFloat("LON");
 			Long height = results.getLong("HEIGHT");
 			if (!lat.equals(preLat)) {
 				dataTileRow = new ArrayList<DataTile>();

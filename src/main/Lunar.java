@@ -18,10 +18,10 @@ import database.DbConnection;
 
 public class Lunar {
 
-	public static final Double LAT_MAX = 90d;
-	public static final Double LAT_MIN = -90d;
-	public static final Double LON_MAX = 180d;
-	public static final Double LON_MIN = -180d;
+	public static final int LAT_MAX = 90;
+	public static final int LAT_MIN = -90;
+	public static final int LON_MAX = 360;
+	public static final int LON_MIN = 0;
 
 	public static final String OUT_DIR = "c:\\temp";
 	public static final String PIXEL_DIR = "\\pixels";
@@ -35,12 +35,13 @@ public class Lunar {
 		try {
 			boolean buildDb = false;
 			boolean buildSet = false;
-			
+			boolean createImage = true;
+
 			File outImage;
 
 			String path = "resources\\COLOR_SCALEBAR.TIF";
-			Double totalElevation = 19910d;
-			Double startElevationValue = -9150d;
+			Float totalElevation = 19910f;
+			Float startElevationValue = -9150f;
 			if (buildDb) {
 				PaletteProcess palette = new PaletteProcess();
 				palette.createPalette(path, totalElevation, startElevationValue);
@@ -56,46 +57,47 @@ public class Lunar {
 				System.out.println("Data set built... wooo!");
 			}
 
-			DbConnection dbConn = new DbConnection();
-			Connection conn = dbConn.getConnection();
-			ResultSet results = null;
-			Statement stmt = null;
-			try {
-				stmt = conn.createStatement();
-				results = stmt
-						.executeQuery("SELECT * FROM set_30 ORDER BY LAT, LON");
+			if (createImage) {
+				DbConnection dbConn = new DbConnection();
+				Connection conn = dbConn.getConnection();
+				ResultSet results = null;
+				Statement stmt = null;
+				try {
+					stmt = conn.createStatement();
+					results = stmt
+							.executeQuery("SELECT * FROM set_30 ORDER BY LAT, LON");
 
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
 
+				}
+
+				results.beforeFirst();
+
+				ArrayList<DataTile> dataTiles = new ArrayList<DataTile>();
+				while (results.next()) {
+					Float lat = results.getFloat("LAT");
+					Float lon = results.getFloat("LON");
+					Long height = results.getLong("HEIGHT");
+					int rank = results.getInt("RANK");
+					dataTiles.add(new DataTile(lat, lon, rank, height
+							.doubleValue()));
+				}
+				stmt.close();
+				try {
+					dbConn.closeConnection(conn);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ImageCreateOverlay image = new ImageCreateOverlay();
+				outImage = image.createOverlay(dataTiles, 0.99f, 0.99f);
+
+				CreateKml map = new CreateKml();
+				map.CreateKmz("test", outImage);
 			}
-
-			results.beforeFirst();
-
-			ArrayList<DataTile> dataTiles = new ArrayList<DataTile>();
-			while (results.next()) {
-				Float lat = results.getFloat("LAT");
-				Float lon = results.getFloat("LON");
-				Long height = results.getLong("HEIGHT");
-				int rank = results.getInt("RANK");
-				dataTiles
-						.add(new DataTile(lat, lon, rank, height.doubleValue()));
-			}
-			stmt.close();
-			try {
-				dbConn.closeConnection(conn);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			ImageCreateOverlay image = new ImageCreateOverlay();
-			outImage = image.createOverlay(dataTiles, 0.99f, 0.99f);
-
-			CreateKml map = new CreateKml();
-			map.CreateKmz("test", outImage);
-
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

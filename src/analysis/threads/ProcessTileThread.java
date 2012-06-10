@@ -32,6 +32,14 @@ public class ProcessTileThread implements Runnable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			} else {
+				System.out.println("Waiting on Data");
+				try {
+					Thread.sleep(3000l);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -94,6 +102,8 @@ public class ProcessTileThread implements Runnable {
 		DataTile dataTile = new DataTile(lat, lon, rankAverage, finalHeight);
 		ThreadStorage.putProcessedTile(dataTile);
 
+		System.out.printf("Data Tile processed. Lat: %s, Lon: %s \n", lat, lon);
+		
 		// Clean up
 		dataTile = null;
 		heightArray = null;

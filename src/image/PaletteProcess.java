@@ -32,8 +32,8 @@ public class PaletteProcess {
 	}
 
 	// Read in the tiff file
-	public void createPalette(String filename, Double totalElevation,
-			Double startElevationValue) throws IOException {
+	public void createPalette(String filename, Float totalElevation,
+			Float startElevationValue) throws IOException {
 
 		// int totalElevation = 19910;
 		// int startElevationValue = -9150;
@@ -44,10 +44,10 @@ public class PaletteProcess {
 
 		// Find the number of pixels.
 		int maxYPixel = image.getHeight();
-		Double elevationIncrement = totalElevation / maxYPixel;
+		Float elevationIncrement = totalElevation / maxYPixel;
 
 		// get the rgb value of each pixel and allocate an elevation to it.
-		Double i = startElevationValue;
+		Float i = startElevationValue;
 		for (int y = 0; y < maxYPixel; y++) {
 			int[] rgb = null;
 			rgb = image.getPixel(0, y, rgb);
@@ -80,27 +80,26 @@ public class PaletteProcess {
 
 	}
 
-	public Double convertRgb(String[] rgbString) throws Exception {
+	public Float convertRgb(String[] rgbString) throws Exception {
 		int red = Integer.parseInt(rgbString[0]);
 		int green = Integer.parseInt(rgbString[1]);
 		int blue = Integer.parseInt(rgbString[2]);
 		if (evaluationMap.containsKey(red, green, blue)) {
-			return (Double) evaluationMap.get(red, green, blue);
+			return (Float) evaluationMap.get(red, green, blue);
 		} else {
 			return findCloesetRgb(red, green, blue);
 		}
 
-//		if (evaluationMap.containsKey(red, green, blue)) {
-//			return (Double) evaluationMap.get(red, green, blue);
-//		} else {
-//			throw new Exception(
-//					"It thought it found a height but apparently it hadnt :S");
-//		}
+		// if (evaluationMap.containsKey(red, green, blue)) {
+		// return (Double) evaluationMap.get(red, green, blue);
+		// } else {
+		// throw new Exception(
+		// "It thought it found a height but apparently it hadnt :S");
+		// }
 	}
 
-
 	@SuppressWarnings("unchecked")
-	private Double findCloesetRgb(int red, int green, int blue) {
+	private Float findCloesetRgb(int red, int green, int blue) {
 
 		int runningRed = red;
 		int runningGreen = green;
@@ -109,8 +108,6 @@ public class PaletteProcess {
 		int diffRed = 255;
 		int diffGreen = 255;
 		int diffBlue = 255;
-		
-		
 
 		Set<Integer> possibleReds = redMap.keySet();
 
@@ -129,14 +126,16 @@ public class PaletteProcess {
 				for (Integer possibleBlue : possibleBlues) {
 					if (evaluationMap.containsKey(possibleRed, possibleGreen,
 							possibleBlue)) {
-						matches.add(calcRgbDiff(red, green, blue, possibleRed, possibleGreen, possibleBlue));
+						matches.add(calcRgbDiff(red, green, blue, possibleRed,
+								possibleGreen, possibleBlue));
 					}
 				}
 			}
 		}
-		
+
 		for (Integer[] match : matches) {
-			if(match[3] < diffRed && match[4] < diffGreen && match[5] < diffBlue){
+			if (match[3] < diffRed && match[4] < diffGreen
+					&& match[5] < diffBlue) {
 				runningRed = match[0];
 				runningGreen = match[1];
 				runningBlue = match[2];
@@ -145,9 +144,32 @@ public class PaletteProcess {
 				diffBlue = match[5];
 			}
 		}
-		
-		
-		return (Double) evaluationMap.get(runningRed, runningGreen, runningBlue);
+
+		return (Float) evaluationMap
+				.get(runningRed, runningGreen, runningBlue);
+
+		// boolean rgbFound = false;
+		//
+		// for (int i = 0; i < 255; i++) {
+		// for (int j = 0; j <= i; j++) {
+		// for (int k = 0; k <= j; k++) {
+		// for (int l = 0; l <= k; l++) {
+		// rgbFound = evaluationMap.containsKey(red + j, green + k, blue + l);
+		// if (rgbFound) {
+		// return (Float) evaluationMap.get(red + j, green + k, blue + l);
+		// }
+		//
+		// rgbFound = evaluationMap.containsKey(red - j, green - k, blue - l);
+		// if (rgbFound) {
+		// return (Float) evaluationMap.get(red - j, green - k, blue - l);
+		// }
+		// }
+		// }
+		// }
+		// }
+		//
+		// return 0f;
+
 	}
 
 	private Integer[] calcRgbDiff(int startRed, int startGreen, int startBlue,
@@ -162,13 +184,13 @@ public class PaletteProcess {
 		} else {
 			diffRed = possibleRed - startRed;
 		}
-		
+
 		if (startGreen > possibleGreen) {
 			diffGreen = startGreen - possibleGreen;
 		} else {
 			diffGreen = possibleGreen - startGreen;
 		}
-		
+
 		if (startBlue > possibleBlue) {
 			diffBlue = startBlue - possibleBlue;
 		} else {

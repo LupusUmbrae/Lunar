@@ -21,8 +21,8 @@ public class BuildDataSets {
 	private final long MOON_CIRC = 10921000;
 	private final int LAT_MAX = 90;
 	private final int LAT_MIN = -90;
-	private final int LON_MAX = 180;
-	private final int LON_MIN = -180;
+	private final int LON_MAX = 360;
+	private final int LON_MIN = 0;
 
 	/**
 	 * Get base data from database and create a dataset for analysis
@@ -64,7 +64,6 @@ public class BuildDataSets {
 		Thread queryThreadF = new Thread(new GetPixelAreaThread());
 
 		Thread processTileThreadA = new Thread(new ProcessTileThread(distance));
-		Thread processTileThreadB = new Thread(new ProcessTileThread(distance));
 
 		Thread enterTileSetThreadA = new Thread(new EnterTileSetThread(db));
 		Thread enterTileSetThreadB = new Thread(new EnterTileSetThread(db));
@@ -78,7 +77,6 @@ public class BuildDataSets {
 		queryThreadF.start();
 
 		processTileThreadA.start();
-		processTileThreadB.start();
 
 		enterTileSetThreadA.start();
 		enterTileSetThreadB.start();
@@ -86,6 +84,7 @@ public class BuildDataSets {
 		// Lets create the statements
 		currentLat = LAT_MIN;
 		currentLon = LON_MIN;
+		int statementCount = 0;
 		while (currentLat < LAT_MAX) {
 			float startLat;
 			float endLat;
@@ -112,12 +111,13 @@ public class BuildDataSets {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				statementCount++;
 				currentLon += lonStep;
 			}
 			currentLat += latStep;
 		}
 
-		System.out.println("Select statements compelted");
+		System.out.println(statementCount + " Select statements created");
 
 		ThreadStorage.setEndQueries(true);
 
@@ -134,7 +134,7 @@ public class BuildDataSets {
 		System.out.println("Data collected from database");
 
 		ThreadStorage.setEndProcess(true);
-		while (processTileThreadA.isAlive() && processTileThreadB.isAlive()) {
+		while (processTileThreadA.isAlive()) {
 			Thread.sleep(10000);
 		}
 		System.out.println("Data processed and ready for re-entry to database");
