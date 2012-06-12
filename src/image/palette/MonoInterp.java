@@ -1,33 +1,41 @@
 package image.palette;
 
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 
-public class MonoInterp extends Section {
+public class MonoInterp extends Section
+{
 
 	private int startColour;
 	private int endColour;
 	private float stepping;
 	private boolean downwardsLine;
-	private List<Integer> knownPoints;
+	// private List<Integer> knownPoints;
+	private SortedMap<Integer, Float> knownPoints;
 
 	public MonoInterp(int[] min, int[] max, float minAltitude,
 			float maxAltitude, boolean red, boolean green, boolean blue,
-			int startColour, int endColour, List<Integer> knownPoints)
-			throws InterpException {
+			int startColour, int endColour, SortedMap<Integer, Float> knownPoints)
+			throws InterpException
+	{
 		super(min, max, minAltitude, maxAltitude, red, green, blue);
 
-		if (red ^ green ^ blue) {
-			throw new InterpException(
-					"More than one colour is set for the interprotation");
-		}
+//		if ((red ^ green) ^ blue)
+//		{
+//			throw new InterpException(
+//					"More than one colour is set for the interprotation");
+//		}
 		this.knownPoints = knownPoints;
 		this.startColour = startColour;
 		this.endColour = endColour;
 		int steps;
-		if (startColour < endColour) {
+		if (startColour < endColour)
+		{
 			steps = endColour - startColour;
 			this.downwardsLine = false;
-		} else {
+		} else
+		{
 			steps = startColour - endColour;
 			this.downwardsLine = true;
 		}
@@ -35,79 +43,78 @@ public class MonoInterp extends Section {
 	}
 
 	@Override
-	public float process(int[] rgb) {
-		float altitude;
-		int colourPos = -1;
-
-		if (red) {
-			colourPos = 0;
-		}
-		if (green) {
-			colourPos = 1;
-		}
-		if (blue) {
-			colourPos = 2;
-		}
-
-		if (downwardsLine) {
-			altitude = processDownwards(rgb, colourPos);
-		} else {
-			altitude = processUpwards(rgb, colourPos);
-		}
-		return altitude;
-	}
-
-	/**
-	 * 
-	 * @param rgb
-	 * @param colourPos
-	 * @return
-	 */
-	private float processDownwards(int[] rgb, int colourPos) {
+	public float process(int[] rgb)
+	{
 		int[] positions;
+
+		// Start/End points in the rgb list
 		int startPoint;
 		int endPoint;
+
+		// Start/End altitudes in the rgb list
 		float startAlt;
 		float endAlt;
-		float pointStepping;
-		int pointSteps;
-		int colourPoint = rgb[colourPos];
 
+		int steps;
+		float stepping;
+
+		// R, G or B? and its value
+		int colourValue;
+		int colourPosition = -1;
 		float alt;
 
-		positions = findCloesetPoints(colourPoint);
-		startPoint = knownPoints.get(positions[0]);
-		endPoint = knownPoints.get(positions[1]);
-		pointSteps = startPoint - endPoint;
-		startAlt = this.minAltitude + (this.stepping * positions[0]);
-		endAlt = startAlt + this.stepping;
-		pointStepping = (startAlt - endAlt) / pointSteps;
+		if (red)
+		{
+			colourPosition = 0;
+		}
+		if (green)
+		{
+			colourPosition = 1;
+		}
+		if (blue)
+		{
+			colourPosition = 2;
+		}
 
-		alt = startAlt + (pointStepping * (colourPoint - startPoint));
+		colourValue = rgb[colourPosition];
+
+		positions = findCloesetPoints(colourValue);
+
+		startPoint = positions[0];
+		endPoint = positions[1];
+
+		if (downwardsLine)
+		{
+			steps = startPoint - endPoint;
+		} else
+		{
+			steps = endPoint - startPoint;
+		}
+
+		startAlt = this.knownPoints.get(startPoint);
+		endAlt = this.knownPoints.get(endPoint);
+		stepping = (endAlt - startAlt) / steps;
+		alt = startAlt + (stepping * (startPoint - colourValue));
 
 		return alt;
 	}
 
-	private float processUpwards(int[] rgb, int colourPos) {
-
-		return 0;
-	}
-
-	private int[] findCloesetPoints(int point) {
-
+	private int[] findCloesetPoints(int point)
+	{
+		int positionLast = 0;
 		int position = 0;
-		int closestFirstPoint = 0;
-		int closestSecondPoint;
 
-		for (int curPoint : knownPoints) {
+		for (int curPoint : knownPoints.keySet())
+		{
+			position = curPoint;
 			if ((downwardsLine && curPoint > point)
-					|| (!downwardsLine && curPoint < point)) {
+					|| (!downwardsLine && curPoint < point))
+			{
 				break;
 			}
-			position++;
+			positionLast = curPoint;
 		}
-		closestSecondPoint = knownPoints.get(position);
 
-		return new int[] { position - 1, position };
+		return new int[] { position, positionLast };
 	}
 }
