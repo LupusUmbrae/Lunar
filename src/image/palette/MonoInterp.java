@@ -1,51 +1,52 @@
 package image.palette;
 
-import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 
 public class MonoInterp extends Section
 {
 
-	private int startColour;
-	private int endColour;
-	private float stepping;
-	private boolean downwardsLine;
-	// private List<Integer> knownPoints;
-	private SortedMap<Integer, Float> knownPoints;
+	private final boolean downwardsLine;
+	private final SortedMap<Integer, Float> knownPoints;
 
 	public MonoInterp(int[] min, int[] max, float minAltitude,
 			float maxAltitude, boolean red, boolean green, boolean blue,
-			int startColour, int endColour, SortedMap<Integer, Float> knownPoints)
-			throws InterpException
+			int startColour, int endColour,
+			SortedMap<Integer, Float> knownPoints) throws InterpException
 	{
 		super(min, max, minAltitude, maxAltitude, red, green, blue);
 
-//		if ((red ^ green) ^ blue)
-//		{
-//			throw new InterpException(
-//					"More than one colour is set for the interprotation");
-//		}
+		if (!(red ^ green ^ blue))
+		{
+			throw new InterpException(
+					"More than one colour (or none) is set for the interprotation");
+		}
 		this.knownPoints = knownPoints;
-		this.startColour = startColour;
-		this.endColour = endColour;
-		int steps;
 		if (startColour < endColour)
 		{
-			steps = endColour - startColour;
 			this.downwardsLine = false;
 		} else
 		{
-			steps = startColour - endColour;
 			this.downwardsLine = true;
 		}
-		this.stepping = (maxAltitude - minAltitude) / steps;
 	}
 
+	/**
+	 * y = mx+c equation used between two known points either side of the given
+	 * value to interpolate against
+	 * 
+	 * @param int[] rgb The full RGB Value to be interpolated against. Only a
+	 *        single channel is used
+	 * @return float Derived altitude
+	 * @throws InterpException
+	 */
 	@Override
-	public float process(int[] rgb)
+	public float process(int[] rgb) throws InterpException
 	{
 		int[] positions;
+
+		// R, G or B? and its value
+		int colourValue;
+		int colourPosition = -1;
 
 		// Start/End points in the rgb list
 		int startPoint;
@@ -55,13 +56,11 @@ public class MonoInterp extends Section
 		float startAlt;
 		float endAlt;
 
+		// Used in equation
 		int steps;
-		float stepping;
-
-		// R, G or B? and its value
-		int colourValue;
-		int colourPosition = -1;
-		float alt;
+		int xDiff;
+		float gradient;
+		float altitude;
 
 		if (red)
 		{
@@ -76,6 +75,10 @@ public class MonoInterp extends Section
 			colourPosition = 2;
 		}
 
+		if (colourPosition == -1)
+		{
+			throw new InterpException("No colour channel defined for analysis");
+		}
 		colourValue = rgb[colourPosition];
 
 		positions = findCloesetPoints(colourValue);
@@ -85,23 +88,34 @@ public class MonoInterp extends Section
 
 		if (downwardsLine)
 		{
-			steps = startPoint - endPoint;
+			steps = endPoint - startPoint;
+			xDiff = endPoint - colourValue;
 		} else
 		{
-			steps = endPoint - startPoint;
+			steps = startPoint - endPoint;
+			xDiff = startPoint - colourValue;
 		}
 
 		startAlt = this.knownPoints.get(startPoint);
 		endAlt = this.knownPoints.get(endPoint);
-		stepping = (endAlt - startAlt) / steps;
-		alt = startAlt + (stepping * (startPoint - colourValue));
+		gradient = (endAlt - startAlt) / steps;
+		altitude = (gradient * xDiff) + startAlt;
 
-		return alt;
+		return altitude;
 	}
 
-	private int[] findCloesetPoints(int point)
+	/**
+	 * This finds the closest Colour value match both bigger and smaller than
+	 * the given value and returns them
+	 * 
+	 * @param point
+	 *            the Colour value to find cloesest points of
+	 * @return int[] {point before, point after}
+	 * @throws InterpException
+	 */
+	private int[] findCloesetPoints(int point) throws InterpException
 	{
-		int positionLast = 0;
+		int positionLast = 300;
 		int position = 0;
 
 		for (int curPoint : knownPoints.keySet())
@@ -115,6 +129,12 @@ public class MonoInterp extends Section
 			positionLast = curPoint;
 		}
 
-		return new int[] { position, positionLast };
+		if (positionLast == 300 || position == positionLast)
+		{
+			throw new InterpException(
+					"Given point is too big/small for this section");
+		}
+
+		return new int[] { positionLast, position };
 	}
 }

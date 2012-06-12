@@ -75,20 +75,28 @@ public class TestMonoInterp extends TestCase
 		knownPoints.put(42, -4287.6514f);
 		knownPoints.put(40, -4236.4688f);
 
-		testInterp = new MonoInterp(new int[] {237, 234, 234}, new int[] {243, 41, 40}, -6949.1475f, -4236.4688f, false,
-				false, true, 234, 40, knownPoints);
+		// Min/Max needs some improvements in the section class currently just
+		// pander to it :P
+		testInterp = new MonoInterp(new int[] { 237, 41, 40 }, new int[] { 243,
+				234, 234 }, -6949.1475f, -4236.4688f, false, false, true, 234,
+				40, knownPoints);
 	}
 
 	/**
 	 * Expected results = -6667.643
+	 * 
+	 * @throws InterpException
 	 */
 	@Test
-	public void testFindMatch()
+	public void testFindMatch() throws InterpException
 	{
-		int[] testPoint = new int[] {238, 208, 208};
 		float testResult;
-		//testInterp.inSection(testPoint);
-		
+		boolean inSection;
+		int[] testPoint = new int[] { 238, 208, 208 };
+
+		inSection = testInterp.inSection(testPoint);
+		assertTrue("In Section call returned false", inSection);
+
 		testResult = testInterp.process(testPoint);
 		assertEquals("Float isnt right :(", -6667.643f, testResult, 0);
 	}
