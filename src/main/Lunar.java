@@ -2,7 +2,7 @@ package main;
 
 import image.ImageCreateOverlay;
 import image.ImageProcess;
-import image.PaletteProcess;
+import image.palette.PaletteProcess;
 
 import java.io.File;
 import java.io.IOException;

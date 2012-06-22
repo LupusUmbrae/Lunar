@@ -1,5 +1,6 @@
 package image;
 
+import image.palette.PaletteProcess;
 import image.threads.ImageStorage;
 
 import java.awt.image.Raster;
