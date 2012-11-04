@@ -20,26 +20,6 @@ public class RGB
         this.blue = rgb[2];
     }
 
-    public int getRed()
-    {
-        return this.red;
-    }
-
-    public int getGreen()
-    {
-        return this.green;
-    }
-
-    public int getBlue()
-    {
-        return this.blue;
-    }
-
-    public int[] getRgb()
-    {
-        return new int[] { this.red, this.green, this.blue };
-    }
-
     @Override
     public boolean equals(Object obj)
     {
@@ -54,8 +34,27 @@ public class RGB
                 equals = true;
             }
         }
-        
 
         return equals;
+    }
+
+    public int getBlue()
+    {
+        return this.blue;
+    }
+
+    public int getGreen()
+    {
+        return this.green;
+    }
+
+    public int getRed()
+    {
+        return this.red;
+    }
+
+    public int[] getRgb()
+    {
+        return new int[] { this.red, this.green, this.blue };
     }
 }

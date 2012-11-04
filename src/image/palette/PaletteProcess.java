@@ -6,13 +6,10 @@ import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.apache.commons.lang3.ArrayUtils;
 
 import com.sun.media.jai.codec.ImageCodec;
 import com.sun.media.jai.codec.ImageDecoder;
@@ -25,6 +22,12 @@ import com.sun.media.jai.codec.ImageDecoder;
 //PaletteProcess palette = new PaletteProcess();
 //palette.createPalette(path, totalElevation, startElevationValue);
 
+/**
+ * Class to handle the palette for the image to be processed
+ * 
+ * @author Robin
+ * 
+ */
 public class PaletteProcess
 {
 
@@ -43,8 +46,18 @@ public class PaletteProcess
 
     }
 
-    // Read in the tiff file
-    public void createPalette(String filename, Float totalElevation,
+    /**
+     * Creates the tool for processing pixels based on the given palette image
+     * 
+     * @param paletteFile
+     *            absolute path to the palette image file. Including file name
+     * @param totalElevation
+     *            total elevation in meters
+     * @param startElevationValue
+     *            minimum elevation in meters
+     * @throws IOException
+     */
+    public void createPalette(String paletteFile, Float totalElevation,
                               Float startElevationValue) throws IOException
     {
 
@@ -54,7 +67,7 @@ public class PaletteProcess
         palette = new ArrayList<int[]>();
         altitudes = new ArrayList<Float>();
 
-        File file = new File(filename);
+        File file = new File(paletteFile);
         ImageDecoder dec = ImageCodec.createImageDecoder("tiff", file, null);
         Raster image = dec.decodeAsRaster();
 
@@ -67,7 +80,7 @@ public class PaletteProcess
         for (int y = 0; y < maxYPixel; y++)
         {
             int[] rgb = null;
-            rgb = image.getPixel(0, y, rgb);
+            rgb = image.getPixel(3, y, rgb);
 
             palette.add(rgb);
             altitudes.add(i);
@@ -78,6 +91,12 @@ public class PaletteProcess
         this.createPaletteSections();
     }
 
+    /**
+     * 
+     * @param rgbString
+     * @return
+     * @throws Exception
+     */
     public Float convertRgb(String[] rgbString) throws Exception
     {
         int red = Integer.parseInt(rgbString[0]);
@@ -93,26 +112,40 @@ public class PaletteProcess
             int[] rgb = new int[] { red, green, blue };
             return convertRgb(rgb);
         }
-
-        // if (evaluationMap.containsKey(red, green, blue)) {
-        // return (Double) evaluationMap.get(red, green, blue);
-        // } else {
-        // throw new Exception(
-        // "It thought it found a height but apparently it hadnt :S");
-        // }
     }
 
+    /**
+     * 
+     * @param rgb
+     * @return
+     * @throws InterpException
+     */
     public Float convertRgb(int[] rgb) throws InterpException
     {
         for (Section paletteSection : sections)
         {
             if (paletteSection.inSection(rgb))
             {
-                return paletteSection.process(rgb);
+                return paletteSection.process(rgb, true);
             }
         }
 
-        throw new InterpException("Not in any sections :S");
+        int diff = 0;
+        while (diff < 5)
+        {
+            diff++;
+            for (Section paletteSection : sections)
+            {
+                if (paletteSection.inSection(rgb, diff))
+                {
+                    return paletteSection.process(rgb, false);
+                }
+            }
+        }
+
+        return null;
+        // throw new InterpException("Not in any sections :S. " + rgb[0] + "," +
+        // rgb[1] + "," + rgb[2]);
     }
 
     /**
@@ -129,7 +162,7 @@ public class PaletteProcess
         sections = new ArrayList<Section>();
 
         // Section A 0-42
-        sectionRgb = palette.subList(0, 41);
+        sectionRgb = palette.subList(0, 42);
         sectionAltitudes = altitudes.subList(0, 42);
         section = processSection(sectionRgb, sectionAltitudes, true, true, true);
         sections.add(section);
@@ -180,7 +213,6 @@ public class PaletteProcess
         section = processSection(sectionRgb, sectionAltitudes, true, true,
                                  false);
         sections.add(section);
-
     }
 
     /**

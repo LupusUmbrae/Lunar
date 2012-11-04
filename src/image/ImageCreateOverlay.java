@@ -17,7 +17,7 @@ public class ImageCreateOverlay
     public File createOverlay(ArrayList<DataTile> dataTiles, float latStep,
                               float lonStep) throws IOException
     {
-        File outputImage = new File(OUT_DIR + "\\lunar_"
+        File outputImage = new File(this.OUT_DIR + "\\lunar_"
                                     + System.currentTimeMillis() + ".png");
         int imageWidth = (int) (360 / lonStep);
         int imageHeight = (int) (180 / latStep);
@@ -42,7 +42,7 @@ public class ImageCreateOverlay
             int y = (int) ((lat.intValue() + 89) / latStep);
             try
             {
-                image.setRGB(x, y, getRgb(rank));
+                image.setRGB(x, y, this.getRgb(rank));
             }
             catch (ArrayIndexOutOfBoundsException e)
             {
@@ -58,7 +58,7 @@ public class ImageCreateOverlay
     /**
      * Convert the given rank into an RGB value for a basic heatmap colour scale
      * 
-     * @param rank 
+     * @param rank
      * @return 6 digit hex RGB value
      */
     private int getRgb(int rank)

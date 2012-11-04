@@ -33,9 +33,9 @@ public class Lunar {
 	 */
 	public static void main(String[] args) {
 		try {
-			boolean buildDb = false;
+			boolean buildDb = true;
 			boolean buildSet = false;
-			boolean createImage = true;
+			boolean createImage = false;
 
 			File outImage;
 

@@ -3,10 +3,6 @@ package test.image.palette;
 import image.RGB;
 import image.palette.InterpException;
 import image.palette.Section;
-
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import junit.framework.TestCase;
 
 import org.apache.commons.collections.map.ListOrderedMap;
@@ -48,7 +44,7 @@ public class TestSection extends TestCase
         inSection = testInterp.inSection(testPoint);
         assertTrue("In Section call returned false", inSection);
 
-        testResult = testInterp.process(testPoint);
+        testResult = testInterp.process(testPoint, true);
         assertEquals("Float isnt right :(", -6667.643f, testResult, 0);
     }
 
@@ -71,7 +67,7 @@ public class TestSection extends TestCase
          inSection = testInterp.inSection(testPoint);
          assertTrue("In Section call returned false", inSection);
 
-        testResult = testInterp.process(testPoint);
+        testResult = testInterp.process(testPoint, true);
         assertEquals("Float isnt right :(", -4065.8601f, testResult, 0);
     }
 

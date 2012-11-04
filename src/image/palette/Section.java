@@ -3,6 +3,8 @@ package image.palette;
 import image.RGB;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 
@@ -12,17 +14,17 @@ public class Section
     private final int[] min;
     private final int[] max;
 
-    private boolean red;
-    private boolean green;
-    private boolean blue;
+    private final boolean red;
+    private final boolean green;
+    private final boolean blue;
 
     private boolean redDownwards;
     private boolean greenDownwards;
     private boolean blueDownwards;
 
-    private final ArrayList<Integer> knownRed;
-    private final ArrayList<Integer> knownGreen;
-    private final ArrayList<Integer> knownBlue;
+    private final List<Integer> knownRed;
+    private final List<Integer> knownGreen;
+    private final List<Integer> knownBlue;
 
     private final ListOrderedMap knownPoints;
 
@@ -38,8 +40,8 @@ public class Section
      * @param green
      * @param blue
      */
-    public Section(boolean red, boolean green,
-                   boolean blue, ListOrderedMap knownPoints)
+    public Section(boolean red, boolean green, boolean blue,
+                   ListOrderedMap knownPoints)
     {
         //
         // Assign class variables
@@ -61,12 +63,14 @@ public class Section
         RGB first = (RGB) knownPoints.firstKey();
         RGB last = (RGB) knownPoints.lastKey();
 
-        int redFirst = first.getRed();
-        int greenFirst = first.getGreen();
-        int blueFirst = first.getBlue();
-        int redLast = last.getRed();
-        int greenLast = last.getGreen();
-        int blueLast = last.getBlue();
+        int redFirst;
+        int greenFirst;
+        int blueFirst;
+        int redLast;
+        int greenLast;
+        int blueLast;
+
+        List<Integer> points = new ArrayList<Integer>();
 
         //
         // Get a list of known colours into array lists
@@ -100,38 +104,24 @@ public class Section
         //
         // Find max/min RGB's for this section
         //
-        if (redFirst > redLast)
-        {
-            redLast = first.getRed();
-            redFirst = last.getRed();
-        }
-        if (greenFirst > greenLast)
-        {
-            greenLast = first.getGreen();
-            greenFirst = last.getGreen();
-        }
-        if (blueFirst > blueLast)
-        {
-            blueLast = first.getBlue();
-            blueFirst = last.getBlue();
-        }
+
+        points = new ArrayList<Integer>(knownRed);
+        Collections.sort(points);
+        redFirst = points.get(0);
+        redLast = points.get(points.size() - 1);
+
+        points = new ArrayList<Integer>(knownGreen);
+        Collections.sort(points);
+        greenFirst = points.get(0);
+        greenLast = points.get(points.size() - 1);
+
+        points = new ArrayList<Integer>(knownBlue);
+        Collections.sort(points);
+        blueFirst = points.get(0);
+        blueLast = points.get(points.size() - 1);
 
         this.min = new int[] { redFirst, greenFirst, blueFirst };
         this.max = new int[] { redLast, greenLast, blueLast };
-    }
-
-    /**
-     * From the given first and last RGB work out the maximum and minimum RGB
-     * values to allow into this section
-     * 
-     * @param first
-     *            RGB first RGB key in the known points
-     * @param last
-     *            RGB last RGB key in the known points
-     */
-    private void findMaxMinValues(RGB first, RGB last)
-    {
-
     }
 
     /**
@@ -143,11 +133,11 @@ public class Section
      * @return int[] {point before, point after}
      * @throws InterpException
      */
-    private int[] findCloesetPoints(int point, ArrayList<Integer> knownPoints,
+    private int[] findCloesetPoints(int point, List<Integer> knownPoints,
                                     boolean downwards) throws InterpException
     {
-        int positionLast = 300;
-        int position = 0;
+        int positionLast = -1;
+        int position = -1;
 
         for (Integer curPoint : knownPoints)
         {
@@ -160,13 +150,29 @@ public class Section
             positionLast = position;
         }
 
-        if (positionLast == 300 || position == positionLast)
+        if (positionLast == -1 || position == positionLast)
         {
             throw new InterpException(
                                       "Given point is too big/small for this section");
         }
 
         return new int[] { positionLast, position };
+    }
+
+    private List<Integer> findPoints(int point, List<Integer> knownPoints)
+    {
+        ArrayList<Integer> positions = new ArrayList<Integer>();
+        if (knownPoints.contains(point))
+        {
+            for (int i = 0; i < knownPoints.size(); i++)
+            {
+                if (knownPoints.get(i) == point)
+                {
+                    positions.add(i);
+                }
+            }
+        }
+        return positions;
     }
 
     /**
@@ -187,6 +193,50 @@ public class Section
     }
 
     /**
+     * 
+     * @param rgb
+     * @param diff
+     * @return
+     */
+    public boolean inSection(int[] rgb, int diff)
+    {
+        boolean inSectionRed = false;
+        boolean inSectionGreen = false;
+        boolean inSectionBlue = false;
+
+        int redMin = this.min[0];
+        int greenMin = this.min[1];
+        int blueMin = this.min[2];
+        int redMax = this.max[0];
+        int greenMax = this.max[1];
+        int blueMax = this.max[2];
+
+        int red = rgb[0];
+        int green = rgb[1];
+        int blue = rgb[2];
+
+        if ((redMin <= red || redMin <= red + diff)
+            && (redMax >= red || redMax <= red - diff))
+        {
+            inSectionRed = true;
+        }
+
+        if ((greenMin <= green || greenMin <= green + diff)
+            && (greenMax >= green || greenMax <= green - diff))
+        {
+            inSectionGreen = true;
+        }
+
+        if ((blueMin <= blue || blueMin <= blue + diff)
+            && (blueMax >= blue || blueMax <= blue - diff))
+        {
+            inSectionBlue = true;
+        }
+
+        return inSectionRed && inSectionGreen && inSectionBlue;
+    }
+
+    /**
      * y = mx+c equation used between two known points either side of the given
      * value to interpolate against
      * 
@@ -195,8 +245,47 @@ public class Section
      * @return float Derived altitude
      * @throws InterpException
      */
-    public float process(int[] rgb) throws InterpException
+    public float process(int[] rgb, boolean exact) throws InterpException
     {
+        // If we got here by using a difference in a channel bring that channel
+        // into the bounds of this section.
+        //
+        // Maybe look at not doing this...
+        if (!exact)
+        {
+            int red = rgb[0];
+            int green = rgb[1];
+            int blue = rgb[2];
+
+            if (red > this.max[0])
+            {
+                red = this.max[0];
+            }
+            else if (red < this.min[0])
+            {
+                red = this.min[0];
+            }
+
+            if (green > this.max[1])
+            {
+                green = this.max[1];
+            }
+            else if (green < this.min[1])
+            {
+                green = this.min[1];
+            }
+
+            if (blue > this.max[2])
+            {
+                blue = this.max[2];
+            }
+            else if (blue < this.min[2])
+            {
+                blue = this.min[2];
+            }
+
+            rgb = new int[] { red, green, blue };
+        }
 
         int channels = 0;
 
@@ -204,14 +293,28 @@ public class Section
         RGB rgbObject = new RGB(rgb);
         if (this.knownPoints.containsKey(rgbObject))
         {
-            this.knownPoints.getValue(this.knownPoints.indexOf(rgbObject));
+            return (Float) this.knownPoints.getValue(this.knownPoints.indexOf(rgbObject));
         }
+
+        List<Integer> redPositions;
+        List<Integer> greenPositions;
+        List<Integer> bluePositions;
 
         if (this.red)
         {
             if (this.knownRed.contains(rgb[0]))
             {
-                // its complicated
+                redPositions = this.findPoints(rgb[0], this.knownRed);
+                if (redPositions.size() == 1)
+                {
+                    altitude += this.knownRed.get(redPositions.get(0));
+                }
+                else
+                // Like it would be that easy!!
+                {
+                    greenPositions = this.findPoints(rgb[1], this.knownRed);
+                    bluePositions = this.findPoints(rgb[2], this.knownRed);
+                }
             }
             else
             {
@@ -225,7 +328,11 @@ public class Section
         {
             if (this.knownGreen.contains(rgb[1]))
             {
-                // its complicated
+                greenPositions = this.findPoints(rgb[0], this.knownRed);
+                if (greenPositions.size() == 1)
+                {
+                    altitude += this.knownRed.get(greenPositions.get(0));
+                }
             }
             else
             {
@@ -238,7 +345,11 @@ public class Section
         {
             if (this.knownBlue.contains(rgb[2]))
             {
-                // its complicated
+                bluePositions = this.findPoints(rgb[0], this.knownRed);
+                if (bluePositions.size() == 1)
+                {
+                    altitude += this.knownRed.get(bluePositions.get(0));
+                }
             }
             else
             {
@@ -250,12 +361,22 @@ public class Section
 
         if (channels == 0)
         {
-            throw new InterpException("No Channels set");
+            return -20000f;
+            // throw new InterpException("No Channels set");
         }
 
         altitude /= channels;
 
         return altitude;
+    }
+
+    public String toString()
+    {
+        String classDetails = String.format("min: %s,%s,%s \nmax: %s,%s,%s \nRed: %s \nGreen: %s \nBlue: %s",
+                                            min[0], min[1], min[2], max[0],
+                                            max[1], max[2], red, green, blue);
+
+        return classDetails;
     }
 
     /**
@@ -269,8 +390,8 @@ public class Section
      * @throws InterpException
      */
     private float processChanel(Integer colourValue,
-                                ArrayList<Integer> searchPoints,
-                                boolean downwards) throws InterpException
+                                List<Integer> searchPoints, boolean downwards)
+                                                                              throws InterpException
     {
         int[] positions;
 
@@ -315,6 +436,12 @@ public class Section
         altitude = (gradient * xDiff) + startAlt;
 
         return altitude;
+    }
+
+    private float findClosestAltitude()
+    {
+
+        return 0f;  
     }
 
 }
