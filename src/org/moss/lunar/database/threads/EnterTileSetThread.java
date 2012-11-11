@@ -17,7 +17,6 @@ public class EnterTileSetThread implements Runnable {
 		this.db = db;
 	}
 
-	@Override
 	public void run() {
 		DbConnection dbConn = new DbConnection();
 		Connection conn = dbConn.getConnection();

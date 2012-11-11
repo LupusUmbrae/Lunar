@@ -15,7 +15,6 @@ public class ProcessTileThread implements Runnable {
 		this.distance = distance;
 	}
 
-	@Override
 	public void run() {
 		RawTile rawTile;
 		ArrayList<ArrayList<DataTile>> tiles;

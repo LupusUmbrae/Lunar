@@ -1,10 +1,9 @@
 package org.moss.lunar.test.image.palette;
 
-import static org.junit.Assert.fail;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.moss.lunar.image.RGB;
+import org.moss.lunar.types.RgbDto;
 
 public class TestRGB extends TestCase
 {
@@ -13,8 +12,8 @@ public class TestRGB extends TestCase
     public void testEqualsTrue()
     {
         boolean equals;
-        RGB rgb = new RGB(10, 11, 12);
-        RGB compareTo = new RGB(10, 11, 12);
+        RgbDto rgb = new RgbDto(10, 11, 12);
+        RgbDto compareTo = new RgbDto(10, 11, 12);
 
         equals = rgb.equals(compareTo);
 
@@ -24,8 +23,8 @@ public class TestRGB extends TestCase
     public void testEqualsFalse()
     {
         boolean equals;
-        RGB rgb = new RGB(10, 11, 12);
-        RGB compareTo = new RGB(11, 10, 12);
+        RgbDto rgb = new RgbDto(10, 11, 12);
+        RgbDto compareTo = new RgbDto(11, 10, 12);
 
         equals = rgb.equals(compareTo);
 
@@ -35,7 +34,7 @@ public class TestRGB extends TestCase
     public void testEqualsDifferentObject()
     {
         boolean equals;
-        RGB rgb = new RGB(10, 11, 12);
+        RgbDto rgb = new RgbDto(10, 11, 12);
         Object compareTo = new Object();
 
         equals = rgb.equals(compareTo);

@@ -1,6 +1,5 @@
 package org.moss.lunar;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -15,7 +14,9 @@ import org.moss.lunar.image.ImageCreateOverlay;
 import org.moss.lunar.image.ImageProcess;
 import org.moss.lunar.image.palette.PaletteProcess;
 import org.moss.lunar.map.CreateKml;
+import org.moss.lunar.postprocess.PostProcessor;
 
+import com.sun.istack.logging.Logger;
 
 public class Lunar {
 
@@ -29,15 +30,24 @@ public class Lunar {
 	public static final String ROW_DIR = "\\row";
 	public static final String PROCESSED_DIR = "\\processed";
 
+	private static Logger logger = Logger.getLogger(Lunar.class);
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+
+		logger.info("Lunar starting");
 		try {
-			boolean buildDb = false;
-			boolean postProcess = true;
+			boolean buildDb = true;
+			boolean postProcess = false;
 			boolean buildSet = false;
 			boolean createImage = false;
+
+			logger.fine("Will run: " + (buildDb ? "Build DB, " : "")
+					+ (postProcess ? "Post Process, " : "")
+					+ (buildSet ? "Build Data Set, " : "")
+					+ (createImage ? "Create KML" : ""));
 
 			File outImage;
 
@@ -45,21 +55,32 @@ public class Lunar {
 			Float totalElevation = 19910f;
 			Float startElevationValue = -9150f;
 			if (buildDb) {
+				logger.info("Build Database Started");
 				PaletteProcess palette = new PaletteProcess();
 				palette.createPalette(path, totalElevation, startElevationValue);
 
 				ImageProcess image = new ImageProcess(palette);
 				image.generateData("resources\\WAC_CSHADE_E000N1800_016P.TIF");
+				logger.info("Build Database finished");
+			}
+
+			if (postProcess) {
+				logger.info("Post Processing Started");
+				PostProcessor postProc = new PostProcessor(0.0625f, 0.0625f);
+				postProc.postProcess();
+				logger.info("Post Pocessing Finished");
 			}
 
 			if (buildSet) {
+				logger.info("Building data set started");
 				BuildDataSets dataSet = new BuildDataSets();
 				dataSet.buildDataSet(30000);
 
-				System.out.println("Data set built... wooo!");
+				logger.info("Building data set finished");
 			}
 
 			if (createImage) {
+				logger.info("Creating height map");
 				DbConnection dbConn = new DbConnection();
 				Connection conn = dbConn.getConnection();
 				ResultSet results = null;
@@ -96,9 +117,10 @@ public class Lunar {
 				}
 				ImageCreateOverlay image = new ImageCreateOverlay();
 				outImage = image.createOverlay(dataTiles, 0.99f, 0.99f);
-
+				logger.info("Height Map created, KML Creation started");
 				CreateKml map = new CreateKml();
 				map.CreateKmz("test", outImage);
+				logger.info("KML Created");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -113,6 +135,6 @@ public class Lunar {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		logger.info("Lunar Finished");
 	}
 }

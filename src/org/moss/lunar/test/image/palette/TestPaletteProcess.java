@@ -2,10 +2,12 @@ package org.moss.lunar.test.image.palette;
 
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.moss.lunar.image.palette.InterpException;
 import org.moss.lunar.image.palette.PaletteProcess;
-
-import junit.framework.TestCase;
 
 public class TestPaletteProcess extends TestCase
 {
@@ -14,6 +16,7 @@ public class TestPaletteProcess extends TestCase
     /**
      * 
      */
+    @Before
     public void setUp(){
         palette = new PaletteProcess();
         String path = "resources\\COLOR_SCALEBAR.TIF";
@@ -32,6 +35,7 @@ public class TestPaletteProcess extends TestCase
     /**
      * 
      */
+    @Test
     public void testPaletteProcess()
     {
         int[] testPoint = new int[] { 243, 51, 38 };

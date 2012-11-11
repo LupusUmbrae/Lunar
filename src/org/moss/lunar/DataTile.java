@@ -41,7 +41,6 @@ public class DataTile implements Comparator<DataTile> {
 		return height;
 	}
 
-	@Override
 	public int compare(DataTile tileA, DataTile tileB) {
 		
 		if(tileA.getLat() < tileB.getLat()){

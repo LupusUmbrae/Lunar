@@ -5,9 +5,9 @@ import junit.framework.TestCase;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.junit.Before;
 import org.junit.Test;
-import org.moss.lunar.image.RGB;
 import org.moss.lunar.image.palette.InterpException;
 import org.moss.lunar.image.palette.Section;
+import org.moss.lunar.types.RgbDto;
 
 public class TestSection extends TestCase
 {
@@ -30,10 +30,10 @@ public class TestSection extends TestCase
 
         Section testInterp;
 
-        knownPoints.put(new RGB(new int[] { 238, 215, 215 }), -6744.417f);
-        knownPoints.put(new RGB(new int[] { 238, 210, 210 }), -6693.2344f);
-        knownPoints.put(new RGB(new int[] { 238, 206, 206 }), -6642.052f);
-        knownPoints.put(new RGB(new int[] { 239, 201, 201 }), -6590.869f);
+        knownPoints.put(new RgbDto(new int[] { 238, 215, 215 }), -6744.417f);
+        knownPoints.put(new RgbDto(new int[] { 238, 210, 210 }), -6693.2344f);
+        knownPoints.put(new RgbDto(new int[] { 238, 206, 206 }), -6642.052f);
+        knownPoints.put(new RgbDto(new int[] { 239, 201, 201 }), -6590.869f);
 
         testInterp = new Section(false, true, true, knownPoints);
 
@@ -53,10 +53,10 @@ public class TestSection extends TestCase
         ListOrderedMap knownPoints = new ListOrderedMap();
         Section testInterp;
 
-        knownPoints.put(new RGB(new int[] { 243, 47, 39 }), -4134.1035f);
-        knownPoints.put(new RGB(new int[] { 243, 49, 38 }), -4082.921f);
-        knownPoints.put(new RGB(new int[] { 242, 52, 38 }), -4031.7383f);
-        knownPoints.put(new RGB(new int[] { 242, 54, 37 }), -3980.5557f);
+        knownPoints.put(new RgbDto(new int[] { 243, 47, 39 }), -4134.1035f);
+        knownPoints.put(new RgbDto(new int[] { 243, 49, 38 }), -4082.921f);
+        knownPoints.put(new RgbDto(new int[] { 242, 52, 38 }), -4031.7383f);
+        knownPoints.put(new RgbDto(new int[] { 242, 54, 37 }), -3980.5557f);
 
         testInterp = new Section(false, true, false, knownPoints);
 

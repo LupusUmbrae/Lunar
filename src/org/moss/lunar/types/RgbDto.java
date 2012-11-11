@@ -1,19 +1,19 @@
-package org.moss.lunar.image;
+package org.moss.lunar.types;
 
-public class RGB
+public class RgbDto
 {
     private int red;
     private int green;
     private int blue;
 
-    public RGB(int red, int green, int blue)
+    public RgbDto(int red, int green, int blue)
     {
         this.red = red;
         this.green = green;
         this.blue = blue;
     }
 
-    public RGB(int[] rgb)
+    public RgbDto(int[] rgb)
     {
         this.red = rgb[0];
         this.green = rgb[1];
@@ -24,9 +24,9 @@ public class RGB
     public boolean equals(Object obj)
     {
         boolean equals = false;
-        if (obj instanceof RGB)
+        if (obj instanceof RgbDto)
         {
-            RGB compareTo = (RGB) obj;
+            RgbDto compareTo = (RgbDto) obj;
             if (this.red == compareTo.getRed()
                 && this.green == compareTo.getGreen()
                 && this.blue == compareTo.getBlue())

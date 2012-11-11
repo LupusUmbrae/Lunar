@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.moss.lunar.image.RGB;
+import org.moss.lunar.types.RgbDto;
 
 public class Section
 {
@@ -60,8 +60,8 @@ public class Section
         // Constructor variables
         //
 
-        RGB first = (RGB) knownPoints.firstKey();
-        RGB last = (RGB) knownPoints.lastKey();
+        RgbDto first = (RgbDto) knownPoints.firstKey();
+        RgbDto last = (RgbDto) knownPoints.lastKey();
 
         int redFirst;
         int greenFirst;
@@ -77,7 +77,7 @@ public class Section
         //
         for (Object key : knownPoints.keySet())
         {
-            RGB currentRgb = (RGB) key;
+            RgbDto currentRgb = (RgbDto) key;
             this.knownRed.add(currentRgb.getRed());
             this.knownGreen.add(currentRgb.getGreen());
             this.knownBlue.add(currentRgb.getBlue());
@@ -245,7 +245,7 @@ public class Section
      * @return float Derived altitude
      * @throws InterpException
      */
-    public float process(int[] rgb, boolean exact) throws InterpException
+    public Float process(int[] rgb, boolean exact) throws InterpException
     {
         // If we got here by using a difference in a channel bring that channel
         // into the bounds of this section.
@@ -290,7 +290,7 @@ public class Section
         int channels = 0;
 
         float altitude = 0f;
-        RGB rgbObject = new RGB(rgb);
+        RgbDto rgbObject = new RgbDto(rgb);
         if (this.knownPoints.containsKey(rgbObject))
         {
             return (Float) this.knownPoints.getValue(this.knownPoints.indexOf(rgbObject));
@@ -361,7 +361,7 @@ public class Section
 
         if (channels == 0)
         {
-            return -20000f;
+            return null;
             // throw new InterpException("No Channels set");
         }
 

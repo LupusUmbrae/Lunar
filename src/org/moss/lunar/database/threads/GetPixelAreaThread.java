@@ -15,7 +15,6 @@ import org.moss.lunar.database.storage.ThreadStorage;
 
 public class GetPixelAreaThread implements Runnable {
 
-	@Override
 	public void run() {
 
 		DbConnection dbConn = new DbConnection();
