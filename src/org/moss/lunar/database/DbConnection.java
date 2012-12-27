@@ -12,9 +12,9 @@ public class DbConnection {
 	private final static String MYSQL_USER = "lunar";
 	private final static String MYSQL_PASSWORD = "lunar";
 
-	int connectionPool = 8;
+	private static int connectionPool = 8;
 
-	public Connection getConnection() {
+	public static Connection getConnection() {
 		if (connectionPool > 0) {
 			connectionPool--;
 			return openConnection();
@@ -23,12 +23,12 @@ public class DbConnection {
 		}
 	}
 
-	public void closeConnection(Connection conn) throws SQLException {
+	public static void closeConnection(Connection conn) throws SQLException {
 		conn.close();
 		connectionPool++;
 	}
 
-	private Connection openConnection() {
+	private static Connection openConnection() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			String url = String.format("jdbc:mysql://%s:%s/%s", MYSQL_IP,
