@@ -1,5 +1,7 @@
 package org.moss.lunar.palette.types;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.moss.lunar.image.types.PixelDto;
@@ -8,27 +10,26 @@ import org.moss.lunar.image.types.RgbEnum;
 public class Section
 {
 
-    private boolean red;
-    private boolean green;
-    private boolean blue;
+    private boolean redApplicable;
+    private boolean greenApplicable;
+    private boolean blueApplicable;
+
+    private ColourChannel redChannel;
+    private ColourChannel greenChannel;
+    private ColourChannel blueChannel;
+
+    // Prioritised channels
+    private ColourChannel channelA;
+    private ColourChannel channelB;
+    private ColourChannel channelC;
+
     private List<ScalePointDto> knownPoints;
-
-    private boolean redSlopeDown = false;
-    private boolean greenSlopeDown = false;
-    private boolean blueSlopeDown = false;
-
-    private int minRed;
-    private int minGreen;
-    private int minBlue;
-
-    private int maxRed;
-    private int maxGreen;
-    private int maxBlue;
 
     private String name;
 
     /**
      * Creates the section using the details given.
+     * 
      * @param red
      * @param green
      * @param blue
@@ -38,9 +39,9 @@ public class Section
                    List<ScalePointDto> knownPoints)
     {
         // Store variables
-        this.red = red;
-        this.blue = blue;
-        this.green = green;
+        this.redApplicable = red;
+        this.blueApplicable = blue;
+        this.greenApplicable = green;
 
         this.knownPoints = knownPoints;
 
@@ -54,20 +55,25 @@ public class Section
         int endGreen = knownPoints.get(numberOfPoints).getRgbValue().getRed();
         int endBlue = knownPoints.get(numberOfPoints).getRgbValue().getRed();
 
-        redSlopeDown = startRed > endRed;
-        greenSlopeDown = startGreen > endGreen;
-        blueSlopeDown = startBlue > endBlue;
+        this.redChannel = new ColourChannel(RgbEnum.RED, startRed, endRed);
+        this.greenChannel = new ColourChannel(RgbEnum.GREEN, startGreen,
+                                              endGreen);
+        this.blueChannel = new ColourChannel(RgbEnum.BLUE, startBlue, endBlue);
 
-        minRed = redSlopeDown ? endRed : startRed;
-        maxRed = redSlopeDown ? startRed : endRed;
-
-        minGreen = greenSlopeDown ? endGreen : startGreen;
-        maxGreen = greenSlopeDown ? startGreen : endGreen;
-
-        minBlue = blueSlopeDown ? endBlue : startBlue;
-        maxBlue = blueSlopeDown ? startBlue : endBlue;
-        
         // Prioritise the channels
+
+        List<ColourChannel> channels = new ArrayList<ColourChannel>();
+        channels.add(redChannel);
+        channels.add(greenChannel);
+        channels.add(blueChannel);
+        Collections.sort(channels);
+        channelA = channels.get(0);
+        channelB = channels.get(1);
+        channelC = channels.get(2);
+        
+        System.out.println(channelA.toString());
+        System.out.println(channelB.toString());
+        System.out.println(channelC.toString());
     }
 
     public Section(boolean red, boolean green, boolean blue,
@@ -91,15 +97,18 @@ public class Section
         boolean greenInSection = false;
         boolean blueInSection = false;
 
-        if (red - diff <= maxRed && red + diff >= minRed)
+        if (red - diff <= redChannel.getMax()
+            && red + diff >= redChannel.getMin())
         {
             redInSection = true;
         }
-        if (green - diff <= maxGreen && green + diff >= minGreen)
+        if (green - diff <= greenChannel.getMax()
+            && green + diff >= greenChannel.getMin())
         {
             greenInSection = true;
         }
-        if (blue - diff <= maxBlue && blue + diff >= minBlue)
+        if (blue - diff <= blueChannel.getMax()
+            && blue + diff >= blueChannel.getMin())
         {
             blueInSection = true;
         }

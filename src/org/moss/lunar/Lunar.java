@@ -22,8 +22,8 @@ public class Lunar
      */
     public static void main(String[] args) throws SQLException
     {
-        boolean runAnalysis = false;
-        boolean runConversion = true;
+        boolean runAnalysis = true;
+        boolean runConversion = false;
 
         try
         {
