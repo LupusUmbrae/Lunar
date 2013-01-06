@@ -105,6 +105,9 @@ public class PaletteProcessor
     {
         // Attempt to find a section the pixel belongs to
         Section possibleSection = null;
+        int diff = 0;
+        Float altitude = null;
+
         for (Section section : sections)
         {
             if (section.inSection(pixel))
@@ -124,6 +127,7 @@ public class PaletteProcessor
                     if (section.inSection(pixel, i))
                     {
                         possibleSection = section;
+                        diff = i;
                         break;
                     }
                 }
@@ -134,9 +138,13 @@ public class PaletteProcessor
             }
         }
 
-        //possibleSection.
-        
-        return null;
+        // possibleSection.
+        if (possibleSection != null)
+        {
+            altitude = possibleSection.convertPixel(pixel, maxDiff);
+        }
+
+        return altitude;
     }
 
     /**

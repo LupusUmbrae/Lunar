@@ -107,7 +107,7 @@ public class PixelDto
         this.y = y;
     }
 
-    public int getValueFromEnum(RgbEnum channel) throws UnknownObjectException
+    public int getChannelValueFromEnum(RgbEnum channel) throws IllegalArgumentException
     {
         int value;
         switch (channel)
@@ -122,7 +122,7 @@ public class PixelDto
             value = blue;
             break;
         default:
-            throw new UnknownObjectException("Unknown channel: "
+            throw new IllegalArgumentException("Unknown channel: "
                                              + channel.name());
         }
         return value;

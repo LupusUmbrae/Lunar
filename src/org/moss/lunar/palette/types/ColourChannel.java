@@ -11,6 +11,8 @@ public class ColourChannel implements Comparable<ColourChannel>
     private final int min;
     private final int diff;
 
+    private final boolean enabled;
+
     /**
      * Creates a colour channel based on the given details
      * 
@@ -18,13 +20,15 @@ public class ColourChannel implements Comparable<ColourChannel>
      * @param startPoint
      * @param endPoint
      */
-    public ColourChannel(RgbEnum colourChannel, int startPoint, int endPoint)
+    public ColourChannel(RgbEnum colourChannel, int startPoint, int endPoint,
+                         boolean enabled)
     {
         this.colourChannel = colourChannel;
         downwardsSlope = startPoint > endPoint;
         min = downwardsSlope ? endPoint : startPoint;
         max = downwardsSlope ? startPoint : endPoint;
         diff = max - min;
+        this.enabled = enabled;
     }
 
     public RgbEnum getChannel()
@@ -52,20 +56,35 @@ public class ColourChannel implements Comparable<ColourChannel>
         return diff;
     }
 
+    public boolean isEnabled()
+    {
+        return enabled;
+    }
+
     @Override
     public int compareTo(ColourChannel o)
     {
         int result = 0;
-        if (o.getDiff() == diff)
-        {
-            result = 0;
-        } else if (o.getDiff() > diff)
+        if (o.isEnabled() && !this.enabled)
         {
             result = 1;
-        } else if (o.getDiff() < diff)
+        } else if (!o.isEnabled() && this.enabled)
         {
             result = -1;
+        } else
+        {
+            if (o.getDiff() == diff)
+            {
+                result = 0;
+            } else if (o.getDiff() > diff)
+            {
+                result = 1;
+            } else if (o.getDiff() < diff)
+            {
+                result = -1;
+            }
         }
+
         return result;
     }
 
@@ -73,8 +92,8 @@ public class ColourChannel implements Comparable<ColourChannel>
     public String toString()
     {
         return String.format("Colours Channel for %s. Min %s, Max %s, %sSlope",
-                      colourChannel.name(), min, max,
-                      downwardsSlope ? "downwards" : "upwards");
+                             colourChannel.name(), min, max,
+                             downwardsSlope ? "downwards" : "upwards");
     }
 
 }
